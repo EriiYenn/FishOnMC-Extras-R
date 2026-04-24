@@ -133,6 +133,7 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
 
         InventoryHandler.instance().onLeave();
 
+        ProfitTrackerHandler.instance().resetSession();
     }
 
     private void onJoin(ClientPacketListener clientPacketListener, PacketSender packetSender, Minecraft minecraft) {
@@ -158,6 +159,8 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
             ChatHandler.instance().init();
             NotifierHandler.instance().init();
             TimerHandler.instance().init();
+
+            ProfitTrackerHandler.instance().onSessionStart();
         }
     }
 

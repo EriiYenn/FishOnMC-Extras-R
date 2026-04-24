@@ -16,7 +16,7 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedNumber;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-@Version(version = 3)
+@Version(version = 4)
 @Translatable.Name("HUD Configuration")
 @Translatable.Desc("§7Configure HUD elements")
 public class HUDConfig extends Config {
@@ -103,6 +103,27 @@ public class HUDConfig extends Config {
     @ConfigGroup.Pop
     @Name("Show Tacklebox Lock")
     public ValidatedBoolean showBaitLock = new ValidatedBoolean(true);
+
+    @Name("Profit Tracker")
+    @Desc("§7Session fishing profit (from item NBT money or static fallbacks)")
+    public ConfigGroup profitTrackerElementGroup = new ConfigGroup("profit_tracker_element_group");
+
+    @Name("Show Profit Tracker")
+    public ValidatedBoolean showProfitTrackerElement = new ValidatedBoolean(true);
+
+    @Name("X Position in %")
+    public ValidatedInt profitTrackerElementXPosition = new ValidatedInt(1, 100, 0, ValidatedNumber.WidgetType.SLIDER);
+
+    @Name("Y Position in %")
+    public ValidatedInt profitTrackerElementYPosition = new ValidatedInt(28, 100, 0, ValidatedNumber.WidgetType.SLIDER);
+
+    @Name("Anchor point")
+    public ValidatedChoice<Alignment> profitTrackerElementAlignment = new ValidatedChoice<>(Alignment.TOP_LEFT, Alignment.getCorners(), new ValidatedEnum<>(Alignment.class).instanceEntry(), ValidatedChoice.WidgetType.CYCLING);
+
+    @ConfigGroup.Pop
+    @Name("Scale")
+    @Desc("§7This will scale based on the ratio. So 0.5 would be half the size")
+    public ValidatedFloat profitTrackerElementScale = ValidatedNumber.withIncrement(new ValidatedFloat(1.0f, 2.0f, 0.1f), 0.05f);
 
     @Name("Pet Element")
     @Desc("§7This is your pet shown on the hud. (Name, Level, Picture)")

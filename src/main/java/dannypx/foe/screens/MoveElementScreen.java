@@ -123,6 +123,25 @@ public class MoveElementScreen extends DefaultModScreen {
         ));
 
         widgets.add(new MovableBoxWidget(this.minecraft,
+                new ProfitTrackerElement(true),
+                Alignment.getCorners(),
+                new MovableBoxWidget.Callback() {
+                    @Override
+                    public void onRelease(int xPercent, int yPercent, Alignment alignment) {
+                        Configs.hudConfig.profitTrackerElementXPosition.accept(xPercent);
+                        Configs.hudConfig.profitTrackerElementYPosition.accept(yPercent);
+                        Configs.hudConfig.profitTrackerElementAlignment.accept(alignment);
+                        Configs.hudConfig.save();
+                    }
+
+                    @Override
+                    public void onConfig() {
+                        ConfigApiJava.INSTANCE.openScreen(Configs.hudConfig.showProfitTrackerElement.translationKey());
+                    }
+                }
+        ));
+
+        widgets.add(new MovableBoxWidget(this.minecraft,
                 new NotifierElement(true),
                 Alignment.getCorners(),
                 new MovableBoxWidget.Callback() {
