@@ -24,6 +24,7 @@ public class KeyBindHandler extends Handler {
 
     //region Fields
     private boolean isPressingInspect = false;
+    private boolean wasInspectKeyDown = false;
 
     public boolean isPressingInspect() {
         return isPressingInspect;
@@ -55,7 +56,14 @@ public class KeyBindHandler extends Handler {
             minecraft.setScreen(new MainScreen(minecraft.screen));
         }
 
-        isPressingInspect = KeyBindHelper.isPressed(Configs.keyBindConfig.inspectKeybind);
+        switch (Configs.keyBindConfig.inspectMode.get()) {
+            case HOLD -> isPressingInspect = KeyBindHelper.isPressed(Configs.keyBindConfig.inspectKeybind);
+            case TOGGLE -> {
+                boolean isKeyDown = KeyBindHelper.isPressed(Configs.keyBindConfig.inspectKeybind);
+                if (isKeyDown && !wasInspectKeyDown) isPressingInspect = !isPressingInspect;
+                wasInspectKeyDown = isKeyDown;
+            }
+        }
     }
     //endregion
 

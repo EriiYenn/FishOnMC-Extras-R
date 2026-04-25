@@ -2,6 +2,7 @@ package dannypx.foe.handler.fetch;
 
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.logic.CodeExecuterHandler;
+import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.handler.logic.NotifierHandler;
 import dannypx.foe.handler.store.QuestDataHandler;
 import dannypx.foe.type.tuple.Pair;
@@ -9,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -28,13 +33,31 @@ public class QuestScreenHandler extends Handler {
     }
 
     //region Fields
+    private boolean isScanned = false;
     //endregion
 
     //region Methods
+    public void init(ContainerScreen screen) {
+        isScanned = false;
+
+        ScreenEvents.afterTick(screen).register(screen1 -> {
+            this.tick(screen);
+        });
+    }
+
+    public void tick(ContainerScreen screen) {
+        if(!isScanned
+                && screen.getMenu().slots.get(12).getItem().is(ItemTags.SHULKER_BOXES)
+        ) {
+            isScanned = true;
+            this.checkQuests(screen.getMenu());
+        }
+    }
+
     public void checkQuests(ChestMenu chestMenu) {
         List<QuestDataHandler.Quest> questList = new ArrayList<>();
 
-        CodeExecuterHandler.runLater(2, () -> {
+        CodeExecuterHandler.runLater(1, () -> {
             chestMenu.slots.forEach(slot -> {
                 if (minecraft.player != null
                         && slot.container != minecraft.player.getInventory()

@@ -15,9 +15,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -34,6 +38,7 @@ public class StatsScreenHandler extends Handler {
 
     //region Fields
     private boolean importStats = false;
+    private boolean isScanned = false;
     private List<Component> statsLore = new ArrayList<>();
 
     public void setImportStats(boolean importStats) {
@@ -46,6 +51,23 @@ public class StatsScreenHandler extends Handler {
     //endregion
 
     //region Methods
+    public void init(ContainerScreen screen) {
+        isScanned = false;
+
+        ScreenEvents.afterTick(screen).register(screen1 -> {
+            this.tick(screen);
+        });
+    }
+
+    public void tick(ContainerScreen screen) {
+        if(!isScanned
+                && screen.getMenu().slots.get(12).getItem().is(ItemTags.SHULKER_BOXES)
+        ) {
+            isScanned = true;
+            this.checkStats(screen.getMenu());
+        }
+    }
+
     public void checkStats(ChestMenu chestMenu) {
         if(this.importStats) {
             CodeExecuterHandler.runLater(2, () -> {

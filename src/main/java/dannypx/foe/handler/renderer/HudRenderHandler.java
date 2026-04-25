@@ -7,7 +7,7 @@ import dannypx.foe.handler.fetch.ScoreboardHandler;
 import dannypx.foe.handler.logic.ConnectionHandler;
 import dannypx.foe.handler.logic.LoadingHandler;
 import dannypx.foe.handler.logic.LoggerHandler;
-import dannypx.foe.handler.logic.HitResultHandler;
+import dannypx.foe.handler.fetch.HitResultHandler;
 import dannypx.foe.handler.store.CustomHudDataHandler;
 import dannypx.foe.helper.GuiGraphicsHelper;
 import dannypx.foe.item.TagObject;
@@ -21,9 +21,14 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,7 +124,19 @@ public class HudRenderHandler extends Handler {
             if (validatedItem.value1()) {
                 int itemX = Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2;
                 int itemY = Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2;
-                guiGraphics.setTooltipForNextFrame(minecraft.font, validatedItem.value2().getItemStack(), itemX, itemY);
+                ItemStack itemStack = validatedItem.value2().getItemStack();
+
+                List<Component> tooltipComponents = Screen.getTooltipFromItem(minecraft, itemStack);
+                List<ClientTooltipComponent> clientTooltipComponents = tooltipComponents.stream()
+                        .map(Component::getVisualOrderText)
+                        .map(ClientTooltipComponent::create)
+                        .collect(Util.toMutableList());
+                itemStack.getTooltipImage()
+                        .ifPresent(tooltipComponent ->
+                                clientTooltipComponents.add(clientTooltipComponents.isEmpty() ? 0 : 1, ClientTooltipComponent.create(tooltipComponent))
+                        );
+
+                guiGraphics.renderTooltip(minecraft.font, clientTooltipComponents, itemX, itemY, DefaultTooltipPositioner.INSTANCE, itemStack.get(DataComponents.TOOLTIP_STYLE));
             }
         }
     }

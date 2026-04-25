@@ -14,6 +14,7 @@
     "requireAnnotations": true
   },
   "client": [
+    "accessor.AbstractSelectionListAccessor",
     "accessor.AbstractSelectionListEntryAccessor",
     "accessor.BossHealthOverlayAccessor",
     "accessor.ChatScreenAccessor",

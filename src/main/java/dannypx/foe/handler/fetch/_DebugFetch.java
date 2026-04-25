@@ -27,7 +27,8 @@ public class _DebugFetch {
                 BossEventHandler.class.getName(), BossEventHandler.instance()._getFields(),
                 TitleHandler.class.getName(), TitleHandler.instance()._getFields(),
                 StatsScreenHandler.class.getName(), StatsScreenHandler.instance()._getFields(),
-                GenericContainerScreenHandler.class.getName(), GenericContainerScreenHandler.instance()._getFields()
+                GenericContainerScreenHandler.class.getName(), GenericContainerScreenHandler.instance()._getFields(),
+                HitResultHandler.class.getName(), HitResultHandler.instance()._getFields()
         );
     }
 }
