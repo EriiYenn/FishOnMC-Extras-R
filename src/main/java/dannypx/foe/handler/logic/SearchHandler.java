@@ -108,7 +108,7 @@ public class SearchHandler extends Handler {
         }
     }
 
-    public static AbstractWidget getSearchBar(int x, int y, int width, int height) {
+    public static SearchBarWidget getSearchBar(int x, int y, int width, int height) {
         SearchBarWidget searchBarWidget = new SearchBarWidget(minecraft.font, x, y, width, height,
                 Component.literal("Search Bar"),
                 new ArrayList<>(Arrays.asList(

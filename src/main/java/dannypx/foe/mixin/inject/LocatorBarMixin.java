@@ -16,6 +16,7 @@ public abstract class LocatorBarMixin {
     private void injectRenderBackground(GuiGraphics guiGraphics, DeltaTracker tickCounter, CallbackInfo ci) {
         if(ConnectionHandler.instance().isOnServer()
                 && Configs.mainConfig.enableMod.get()
+                && Configs.mixinConfig.locatorBarMixinRenderBackground.get()
         ) {
             ci.cancel();
         }
@@ -25,6 +26,7 @@ public abstract class LocatorBarMixin {
     private void injectRender(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
         if(ConnectionHandler.instance().isOnServer()
                 && Configs.mainConfig.enableMod.get()
+                && Configs.mixinConfig.locatorBarMixinRender.get()
         ) {
             ci.cancel();
         }

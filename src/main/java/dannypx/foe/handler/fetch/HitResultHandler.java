@@ -1,6 +1,7 @@
-package dannypx.foe.handler.logic;
+package dannypx.foe.handler.fetch;
 
 import dannypx.foe.handler.Handler;
+import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.type.placeholder.PlaceholderValue;
 import dannypx.foe.type.placeholder.ComponentValue;

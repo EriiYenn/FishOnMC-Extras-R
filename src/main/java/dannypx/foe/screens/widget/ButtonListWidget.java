@@ -1,5 +1,6 @@
 package dannypx.foe.screens.widget;
 
+import dannypx.foe.mixin.accessor.AbstractSelectionListAccessor;
 import dannypx.foe.screens.interfaces.ScreenConstants;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +16,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.CommonColors;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 
 public class ButtonListWidget extends AbstractSelectionList<ButtonListWidget.@NotNull ButtonEntry> implements ScreenConstants {
 
@@ -61,16 +61,17 @@ public class ButtonListWidget extends AbstractSelectionList<ButtonListWidget.@No
     }
 
     public int addEntry(ButtonEntry entry, int pos) {
-        this.children().add(pos, entry);
-        return this.children().size() - 1;
+        return super.addEntry(entry, pos - 1);
     }
 
     public void swapUp(int pos) {
-        Collections.swap(this.children(), pos, pos - 1);
+        Collections.swap(((AbstractSelectionListAccessor) this).getChildren(), pos, pos - 1);
+        ((AbstractSelectionListAccessor) this).callRepositionEntries();
     }
 
     public void swapDown(int pos) {
-        Collections.swap(this.children(), pos, pos + 1);
+        Collections.swap(((AbstractSelectionListAccessor) this).getChildren(), pos, pos + 1);
+        ((AbstractSelectionListAccessor) this).callRepositionEntries();
     }
 
     @Override
@@ -162,7 +163,7 @@ public class ButtonListWidget extends AbstractSelectionList<ButtonListWidget.@No
             if(downButton != null) {
                 downButton.setPosition(
                         getX() + CONTENT_PADDING,
-                        getY() + getContentWidth() / 2
+                        getY() + getContentHeight() / 2 + 2
                 );
 
                 downButton.render(guiGraphics, mouseX, mouseY, delta);

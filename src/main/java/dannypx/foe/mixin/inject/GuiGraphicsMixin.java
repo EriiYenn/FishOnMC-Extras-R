@@ -26,7 +26,7 @@ public abstract class GuiGraphicsMixin {
         if(ConnectionHandler.instance().isOnServer()
                 && Configs.mainConfig.enableMod.get()
                 && Configs.rendererConfig.useSmallStackCountNumber.get()
-                && Configs.mixinConfig.GuiGraphicsMixinRenderItemCount.get()
+                && Configs.mixinConfig.guiGraphicsMixinRenderItemCount.get()
         ) {
             ItemRendererHandler.instance().drawStackCount((GuiGraphics) (Object) this, font, stack, x, y);
             ci.cancel();
@@ -37,7 +37,7 @@ public abstract class GuiGraphicsMixin {
     private void renderItemDecorationsInject(Font font, ItemStack stack, int x, int y, String stackCountString, CallbackInfo ci) {
         if(ConnectionHandler.instance().isOnServer()
                 && Configs.mainConfig.enableMod.get()
-                && Configs.mixinConfig.GuiGraphicsMixinRenderItemDecorations.get()
+                && Configs.mixinConfig.guiGraphicsMixinRenderItemDecorations.get()
         ) {
             ItemRendererHandler.instance().drawRarityMarker((GuiGraphics) (Object) this, font, stack, x, y);
             ItemRendererHandler.instance().drawSearchItem((GuiGraphics) (Object) this, stack, x, y);

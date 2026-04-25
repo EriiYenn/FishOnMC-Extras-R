@@ -10,7 +10,7 @@ import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedBoolean;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-@Version(version = 5)
+@Version(version = 6)
 @Translatable.Name("§7§oDev§8§o: §f§oMixin Toggles")
 @Translatable.Desc("§4WARNING §7These are the toggles to mixins. Do not touch these unless you know what you are doing")
 public class MixinConfig extends Config {
@@ -41,10 +41,10 @@ public class MixinConfig extends Config {
     @Name("GuiGraphics Mixin")
     public ConfigGroup guiGraphicsMixinGroup = new ConfigGroup("gui_graphics_mixin_group");
 
-    public ValidatedBoolean GuiGraphicsMixinRenderItemCount = new ValidatedBoolean(true);
+    public ValidatedBoolean guiGraphicsMixinRenderItemCount = new ValidatedBoolean(true);
 
     @ConfigGroup.Pop
-    public ValidatedBoolean GuiGraphicsMixinRenderItemDecorations = new ValidatedBoolean(true);
+    public ValidatedBoolean guiGraphicsMixinRenderItemDecorations = new ValidatedBoolean(true);
 
     @Name("FishingHookEntityRenderer Mixin")
     public ConfigGroup fishingHookEntityRendererMixinGroup = new ConfigGroup("fishing_fishing_hook_entity_renderer_mixin_group");
@@ -89,6 +89,54 @@ public class MixinConfig extends Config {
 
     @ConfigGroup.Pop
     public ValidatedBoolean abstractRecipeBookScreenMixinAddRecipeBook = new ValidatedBoolean(true);
+
+    @Name("AbstractSelectionList Mixin")
+    public ConfigGroup abstractSelectionListMixinGroup = new ConfigGroup("abstract_selection_list");
+
+    @ConfigGroup.Pop
+    public ValidatedBoolean abstractSelectionListMixinAddEntry = new ValidatedBoolean(true);
+
+    @Name("ContextualBarRenderer Mixin")
+    public ConfigGroup contextualBarRendererMixinGroup = new ConfigGroup("contextual_bar_renderer_mixin");
+
+    @ConfigGroup.Pop
+    public ValidatedBoolean contextualBarRendererMixinRenderExperienceLevel = new ValidatedBoolean(true);
+
+    @Name("ExperienceBarRenderer Mixin")
+    public ConfigGroup experienceBarRendererMixinGroup = new ConfigGroup("experience_bar_renderer_mixin");
+
+    public ValidatedBoolean experienceBarRendererMixinRender = new ValidatedBoolean(true);
+
+    @ConfigGroup.Pop
+    public ValidatedBoolean experienceBarRendererMixinRenderBackground = new ValidatedBoolean(true);
+
+    @Name("JumpableVehicleBar Mixin")
+    public ConfigGroup jumpableVehicleBarMixinGroup = new ConfigGroup("jumpable_vehicle_bar_mixin");
+
+    public ValidatedBoolean jumpableVehicleBarMixinRender = new ValidatedBoolean(true);
+
+    @ConfigGroup.Pop
+    public ValidatedBoolean jumpableVehicleBarMixinRenderBackground = new ValidatedBoolean(true);
+
+    @Name("LocatorBarMixin Mixin")
+    public ConfigGroup locatorBarMixinGroup = new ConfigGroup("locator_bar_mixin");
+
+    public ValidatedBoolean locatorBarMixinRender = new ValidatedBoolean(true);
+
+    @ConfigGroup.Pop
+    public ValidatedBoolean locatorBarMixinRenderBackground = new ValidatedBoolean(true);
+
+    @Name("InventoryScreen Mixin")
+    public ConfigGroup inventoryScreenMixinGroup = new ConfigGroup("inventory_screen_mixin");
+
+    @ConfigGroup.Pop
+    public ValidatedBoolean inventoryScreenMixinRenderBg = new ValidatedBoolean(true);
+
+    @Name("LevelRendererBrightnessGetter Mixin")
+    public ConfigGroup levelRendererBrightnessGetterMixinGroup = new ConfigGroup("level_renderer_brightness_getter_mixin");
+
+    @ConfigGroup.Pop
+    public ValidatedBoolean levelRendererBrightnessGetterMixinMethod_68890 = new ValidatedBoolean(true);
 
     @Name("RecipeBookWidget Mixin")
     public ConfigGroup recipeBookWidgetMixinGroup = new ConfigGroup("recipe_book_widget");

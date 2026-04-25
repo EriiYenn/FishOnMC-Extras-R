@@ -16,6 +16,7 @@ public abstract class ExperienceBarRendererMixin {
     private void injectRenderBackground(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if(ConnectionHandler.instance().isOnServer()
                 && Configs.mainConfig.enableMod.get()
+                && Configs.mixinConfig.experienceBarRendererMixinRenderBackground.get()
         ) {
             ci.cancel();
         }
@@ -25,6 +26,7 @@ public abstract class ExperienceBarRendererMixin {
     private void injectRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if(ConnectionHandler.instance().isOnServer()
                 && Configs.mainConfig.enableMod.get()
+                && Configs.mixinConfig.experienceBarRendererMixinRender.get()
         ) {
             ci.cancel();
         }

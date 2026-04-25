@@ -1,5 +1,6 @@
 package dannypx.foe.handler.logic;
 
+import dannypx.foe.handler.fetch.HitResultHandler;
 import dannypx.foe.type.tuple.Pair;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,6 @@ public class _DebugLogic {
                 KeyBindHandler.class.getName(), KeyBindHandler.instance()._getFields(),
                 InventoryHandler.class.getName(), InventoryHandler.instance()._getFields(),
                 NotifierHandler.class.getName(), NotifierHandler.instance()._getFields(),
-                HitResultHandler.class.getName(), HitResultHandler.instance()._getFields(),
                 SearchHandler.class.getName(), SearchHandler.instance()._getFields()
         );
     }

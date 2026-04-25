@@ -3,9 +3,11 @@ package dannypx.foe.handler.renderer;
 import dannypx.foe.handler.ScreenHandler;
 import dannypx.foe.handler.logic.LoadingHandler;
 import dannypx.foe.handler.logic.SearchHandler;
+import dannypx.foe.screens.widget.SearchBarWidget;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.config.Configs;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -25,6 +27,7 @@ public class ChestScreenRenderHandler extends ScreenHandler {
     }
 
     //region Fields
+    SearchBarWidget searchBarWidget;
     //endregion
 
     //region Methods
@@ -39,15 +42,24 @@ public class ChestScreenRenderHandler extends ScreenHandler {
         ) {
             List<AbstractWidget> widgets = new ArrayList<>();
 
-            widgets.add(SearchHandler.getSearchBar(
+            searchBarWidget = SearchHandler.getSearchBar(
                     minecraft.getWindow().getGuiScaledWidth() / 2 - 80,
                     minecraft.getWindow().getGuiScaledHeight() / 2 - 133,
                     160,
                     20
-            ));
+            );
+
+            widgets.add(searchBarWidget);
 
             widgets.forEach(Screens.getButtons(screen)::add);
         }
+    }
+
+    @Override
+    public void render(Screen screen, GuiGraphics guiGraphics, int mouseX, int mouseY, float tickDelta) {
+        super.render(screen, guiGraphics, mouseX, mouseY, tickDelta);
+
+        searchBarWidget.render(guiGraphics, tickDelta);
     }
     //endregion
 

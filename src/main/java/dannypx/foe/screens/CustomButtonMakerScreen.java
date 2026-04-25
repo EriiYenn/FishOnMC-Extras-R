@@ -525,7 +525,7 @@ public class CustomButtonMakerScreen extends Screen implements ScreenConstants {
                                         buttonList.swapUp(pos);
                                     }
                                 }))
-                        .size(25, 10)
+                        .size(25, 8)
                         .tooltip(Tooltip.create(Component.literal("Move button up")))
                         .build(),
                 Button.builder(
@@ -539,7 +539,7 @@ public class CustomButtonMakerScreen extends Screen implements ScreenConstants {
                                         buttonList.swapDown(pos);
                                     }
                                 }))
-                        .size(25, 10)
+                        .size(25, 8)
                         .tooltip(Tooltip.create(Component.literal("Move button down")))
                         .build()
         );
