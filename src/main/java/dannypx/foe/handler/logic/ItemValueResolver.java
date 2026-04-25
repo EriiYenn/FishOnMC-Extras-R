@@ -1,8 +1,11 @@
 package dannypx.foe.handler.logic;
 
+import dannypx.foe.handler.store.ProfitPricingDataHandler;
 import dannypx.foe.item.TagObject;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
@@ -25,10 +28,35 @@ public final class ItemValueResolver {
         if (fixed != null && fixed > 0f) {
             return fixed;
         }
-        String label = stack.getHoverName().getString();
-        if (label.contains("Lightning") && label.contains("Bottle")) {
-            return 50_000f; // prototype static price; replace when server exposes value
+
+        float configured = ProfitPricingDataHandler.instance().getValue(stack);
+        if (configured > 0f) {
+            return configured;
+        }
+
+        float fromLore = valueFromLoreDollars(tag);
+        if (fromLore > 0f) {
+            return fromLore;
         }
         return 0f;
+    }
+
+    /**
+     * When {@code money} is not present in NBT, some server items only expose a dollar amount in the lore
+     * (e.g. "Value: $1.2K"). Picks the largest parsed amount to avoid small incidental {@code $} in text.
+     */
+    private static float valueFromLoreDollars(TagObject tag) {
+        List<Component> lore = tag.getLore();
+        if (lore.isEmpty()) {
+            return 0f;
+        }
+        float best = 0f;
+        for (Component line : lore) {
+            float parsed = MoneyParseUtil.parseLargestAmount(line.getString());
+            if (parsed > best) {
+                best = parsed;
+            }
+        }
+        return best;
     }
 }

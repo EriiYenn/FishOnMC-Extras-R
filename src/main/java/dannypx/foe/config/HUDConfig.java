@@ -105,11 +105,23 @@ public class HUDConfig extends Config {
     public ValidatedBoolean showBaitLock = new ValidatedBoolean(true);
 
     @Name("Profit Tracker")
-    @Desc("§7Session fishing profit (from item NBT money or static fallbacks)")
+    @Desc("§7Session fishing profit. Custom prices, category rules, and reward chat triggers live in config/fishonmcextras/data/<uuid>/profit_pricing.json, profit_categories.json, and profit_reward_triggers.json; use Main Screen -> Reload Profit Data after editing")
     public ConfigGroup profitTrackerElementGroup = new ConfigGroup("profit_tracker_element_group");
 
     @Name("Show Profit Tracker")
     public ValidatedBoolean showProfitTrackerElement = new ValidatedBoolean(true);
+
+    @Name("Show Breakdown")
+    public ValidatedBoolean showProfitTrackerBreakdown = new ValidatedBoolean(true);
+
+    @Name("Show Subcategories")
+    public ValidatedBoolean showProfitTrackerBreakdownSubcategories = new ValidatedBoolean(true);
+
+    @Name("Max Categories")
+    public ValidatedInt profitTrackerBreakdownMaxCategories = new ValidatedInt(4, 8, 1, ValidatedNumber.WidgetType.SLIDER);
+
+    @Name("Max Subcategories")
+    public ValidatedInt profitTrackerBreakdownMaxSubcategories = new ValidatedInt(2, 6, 0, ValidatedNumber.WidgetType.SLIDER);
 
     @Name("X Position in %")
     public ValidatedInt profitTrackerElementXPosition = new ValidatedInt(1, 100, 0, ValidatedNumber.WidgetType.SLIDER);

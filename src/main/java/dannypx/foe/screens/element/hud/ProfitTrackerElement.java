@@ -6,6 +6,9 @@ import dannypx.foe.handler.logic.ProfitTrackerHandler;
 import dannypx.foe.helper.GuiGraphicsHelper;
 import dannypx.foe.config.Configs;
 import dannypx.foe.screens.element.Element;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -26,6 +29,7 @@ public class ProfitTrackerElement extends Element {
                 Configs.hudConfig.profitTrackerElementAlignment.get(),
                 Configs.hudConfig.profitTrackerElementGroup.translation("Profit Tracker"),
                 false);
+        refreshMeasuredSize();
     }
 
     public ProfitTrackerElement(boolean isCopy) {
@@ -36,6 +40,7 @@ public class ProfitTrackerElement extends Element {
                 Configs.hudConfig.profitTrackerElementAlignment.get(),
                 Configs.hudConfig.profitTrackerElementGroup.translation("Profit Tracker"),
                 isCopy);
+        refreshMeasuredSize();
     }
 
     @Override
@@ -46,24 +51,9 @@ public class ProfitTrackerElement extends Element {
 
         Font font = Minecraft.getInstance().font;
         ProfitTrackerHandler h = ProfitTrackerHandler.instance();
-
-        Component title = Component.literal("Profit").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-        Component lineTotal = Component.literal("")
-                .append(Component.literal("Session ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.literal(h.sessionTotalFormatted()).withStyle(ChatFormatting.WHITE));
-        Component lineRate = Component.literal("")
-                .append(Component.literal("/hr ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.literal(h.perHourFormatted()).withStyle(ChatFormatting.AQUA));
-        Component lineLast = Component.literal("")
-                .append(Component.literal("Last ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.literal(h.lastCatchFormatted()).withStyle(ChatFormatting.GREEN))
-                .append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.literal(h.lastCatchNameTruncated()).withStyle(ChatFormatting.GRAY));
-
-        int innerW = Math.max(font.width(title), Math.max(font.width(lineTotal), Math.max(font.width(lineRate), font.width(lineLast))));
-        int innerH = font.lineHeight * 4 + LINE_GAP * 3;
-        int boxW = innerW + PADDING * 2;
-        int boxH = innerH + PADDING * 2;
+        Layout layout = buildLayout(font, h);
+        this.width = layout.boxWidth;
+        this.height = layout.boxHeight;
 
         int scaledWidth = (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() * (1 / Configs.hudConfig.profitTrackerElementScale.get()));
         int scaledHeight = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() * (1 / Configs.hudConfig.profitTrackerElementScale.get()));
@@ -79,29 +69,103 @@ public class ProfitTrackerElement extends Element {
 
             int x = switch (Configs.hudConfig.profitTrackerElementAlignment.get()) {
                 case TOP_LEFT, BOTTOM_LEFT -> Math.round(scaledWidth * xPos);
-                case TOP_RIGHT, BOTTOM_RIGHT -> scaledWidth - Math.round(scaledWidth * xPos) - boxW;
+                case TOP_RIGHT, BOTTOM_RIGHT -> scaledWidth - Math.round(scaledWidth * xPos) - layout.boxWidth;
                 default -> Math.round(scaledWidth * xPos);
             };
 
             int y = switch (Configs.hudConfig.profitTrackerElementAlignment.get()) {
                 case TOP_LEFT, TOP_RIGHT -> Math.round(scaledHeight * yPos);
-                case BOTTOM_LEFT, BOTTOM_RIGHT -> scaledHeight - Math.round(scaledHeight * yPos) - boxH;
+                case BOTTOM_LEFT, BOTTOM_RIGHT -> scaledHeight - Math.round(scaledHeight * yPos) - layout.boxHeight;
                 default -> Math.round(scaledHeight * yPos);
             };
 
-            guiGraphics.fill(x, y, x + boxW, y + boxH, PANEL_ALPHA);
+            guiGraphics.fill(x, y, x + layout.boxWidth, y + layout.boxHeight, PANEL_ALPHA);
 
             int tx = x + PADDING;
             int ty = y + PADDING;
-            GuiGraphicsHelper.drawString(guiGraphics, font, title, tx, ty, true, false, false, false);
-            ty += font.lineHeight + LINE_GAP;
-            GuiGraphicsHelper.drawString(guiGraphics, font, lineTotal, tx, ty, true, false, false, false);
-            ty += font.lineHeight + LINE_GAP;
-            GuiGraphicsHelper.drawString(guiGraphics, font, lineRate, tx, ty, true, false, false, false);
-            ty += font.lineHeight + LINE_GAP;
-            GuiGraphicsHelper.drawString(guiGraphics, font, lineLast, tx, ty, true, false, false, false);
+            for (int i = 0; i < layout.lines.size(); i++) {
+                GuiGraphicsHelper.drawString(guiGraphics, font, layout.lines.get(i), tx, ty, true, false, false, false);
+                if (i < layout.lines.size() - 1) {
+                    ty += font.lineHeight + LINE_GAP;
+                }
+            }
         }
 
         guiGraphics.pose().popMatrix();
+    }
+
+    private void refreshMeasuredSize() {
+        Font font = Minecraft.getInstance().font;
+        if (font != null) {
+            Layout layout = buildLayout(font, ProfitTrackerHandler.instance());
+            this.width = layout.boxWidth;
+            this.height = layout.boxHeight;
+        }
+    }
+
+    private static Layout buildLayout(Font font, ProfitTrackerHandler handler) {
+        List<Component> lines = new ArrayList<>();
+        lines.add(Component.literal("Profit").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+        lines.add(Component.literal("")
+                .append(Component.literal("Session ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(Component.literal(handler.sessionTotalFormatted()).withStyle(ChatFormatting.WHITE)));
+        lines.add(Component.literal("")
+                .append(Component.literal("/hr ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(Component.literal(handler.perHourFormatted()).withStyle(ChatFormatting.AQUA)));
+        lines.add(Component.literal("")
+                .append(Component.literal("Last ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(Component.literal(handler.lastCatchFormatted()).withStyle(ChatFormatting.GREEN))
+                .append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(Component.literal(handler.lastCatchNameTruncated()).withStyle(ChatFormatting.GRAY)));
+
+        if (Configs.hudConfig.showProfitTrackerBreakdown.get() && handler.hasBreakdown()) {
+            lines.add(Component.literal("Sources").withStyle(ChatFormatting.YELLOW));
+
+            int maxCategories = Configs.hudConfig.profitTrackerBreakdownMaxCategories.get();
+            int maxSubcategories = Configs.hudConfig.profitTrackerBreakdownMaxSubcategories.get();
+            boolean showSubs = Configs.hudConfig.showProfitTrackerBreakdownSubcategories.get();
+
+            List<ProfitTrackerHandler.ProfitBreakdownCategoryRow> rows = handler.getBreakdownRows();
+            for (int i = 0; i < Math.min(maxCategories, rows.size()); i++) {
+                ProfitTrackerHandler.ProfitBreakdownCategoryRow row = rows.get(i);
+                lines.add(Component.literal("")
+                        .append(Component.literal(row.label + " ").withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(ProfitTrackerHandler.formatValue(row.total)).withStyle(ChatFormatting.WHITE))
+                        .append(Component.literal(" (" + formatPercent(row.percentOfSession) + ")").withStyle(ChatFormatting.DARK_GRAY)));
+
+                if (showSubs) {
+                    for (int j = 0; j < Math.min(maxSubcategories, row.subRows.size()); j++) {
+                        ProfitTrackerHandler.ProfitBreakdownSubRow subRow = row.subRows.get(j);
+                        lines.add(Component.literal("")
+                                .append(Component.literal("  ").withStyle(ChatFormatting.DARK_GRAY))
+                                .append(Component.literal(subRow.label + " ").withStyle(ChatFormatting.DARK_GRAY))
+                                .append(Component.literal(ProfitTrackerHandler.formatValue(subRow.total)).withStyle(ChatFormatting.GRAY)));
+                    }
+                }
+            }
+        }
+
+        int innerWidth = 0;
+        for (Component line : lines) {
+            innerWidth = Math.max(innerWidth, font.width(line));
+        }
+        int innerHeight = font.lineHeight * lines.size() + LINE_GAP * Math.max(0, lines.size() - 1);
+        return new Layout(lines, innerWidth + PADDING * 2, innerHeight + PADDING * 2);
+    }
+
+    private static String formatPercent(double percent) {
+        return String.format(Locale.US, "%.0f%%", percent);
+    }
+
+    private static class Layout {
+        private final List<Component> lines;
+        private final int boxWidth;
+        private final int boxHeight;
+
+        private Layout(List<Component> lines, int boxWidth, int boxHeight) {
+            this.lines = lines;
+            this.boxWidth = boxWidth;
+            this.boxHeight = boxHeight;
+        }
     }
 }

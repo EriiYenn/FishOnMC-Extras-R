@@ -134,6 +134,7 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
         InventoryHandler.instance().onLeave();
 
         ProfitTrackerHandler.instance().resetSession();
+        ProfitRewardAttributionHandler.instance().reset();
     }
 
     private void onJoin(ClientPacketListener clientPacketListener, PacketSender packetSender, Minecraft minecraft) {
@@ -144,6 +145,9 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
             ConstantDataHandler.instance().init();
             QuestDataHandler.instance().init();
             CrewDataHandler.instance().init();
+            ProfitPricingDataHandler.instance().init();
+            ProfitCategoryDataHandler.instance().init();
+            ProfitRewardTriggerDataHandler.instance().init();
             CustomHudDataHandler.instance().init();
             CustomButtonDataHandler.instance().init();
             CustomNotificationDataHandler.instance().init();
@@ -159,6 +163,7 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
             ChatHandler.instance().init();
             NotifierHandler.instance().init();
             TimerHandler.instance().init();
+            ProfitRewardAttributionHandler.instance().init();
 
             ProfitTrackerHandler.instance().onSessionStart();
         }
@@ -187,6 +192,7 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
                 // Logic
                 if(Configs.handlerConfig.keyBindHandler.get()) KeyBindHandler.instance().tick();
                 if(Configs.handlerConfig.catchingHandler.get()) CatchingHandler.instance().tick();
+                ProfitRewardAttributionHandler.instance().tick();
                 if(Configs.handlerConfig.rayCastHandler.get()) HitResultHandler.instance().tick();
                 if(Configs.handlerConfig.notifierHandler.get()) NotifierHandler.instance().tick();
                 if(Configs.handlerConfig.crewHandler.get()) CrewHandler.instance().tick();

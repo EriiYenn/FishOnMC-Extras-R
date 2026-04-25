@@ -13,7 +13,7 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedNumber;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-@Version(version = 7)
+@Version(version = 8)
 @Translatable.Name("§7§oDev§8§o: §f§oHandlers")
 @Translatable.Desc("§4WARNING §7These are the back-end handlers. Disabling these might stop some " +
         "functions from working. Do not touch these unless you know what you are doing")
@@ -121,6 +121,20 @@ public class HandlerConfig extends Config {
     @ConfigGroup.Pop
     @Desc("§7The delay in ticks before checking items")
     public ValidatedInt catchingItemsDelayCheck = new ValidatedInt(1, 20, 0, ValidatedNumber.WidgetType.SLIDER);
+
+    @Name("Reward Profit Handler")
+    @Desc("§7Handles quest and competition reward attribution for the profit tracker")
+    public ConfigGroup rewardProfitLogicGroup = new ConfigGroup("reward_profit_logic_group");
+
+    @Desc("§7Track quest rewards in the profit tracker")
+    public ValidatedBoolean trackQuestProfit = new ValidatedBoolean(true);
+
+    @Desc("§7Track competition rewards in the profit tracker")
+    public ValidatedBoolean trackCompetitionProfit = new ValidatedBoolean(true);
+
+    @ConfigGroup.Pop
+    @Desc("§7How long in milliseconds reward contexts stay active for inventory gains")
+    public ValidatedLong rewardProfitWindowMs = new ValidatedLong(4000L, 10000L, 250L, ValidatedNumber.WidgetType.SLIDER);
 
 
     @Name("Debug message dismissal time")

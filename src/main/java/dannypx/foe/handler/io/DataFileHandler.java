@@ -48,6 +48,9 @@ public class DataFileHandler extends Handler {
         ConstantDataHandler.instance().tick();
         QuestDataHandler.instance().tick();
         CrewDataHandler.instance().tick();
+        ProfitPricingDataHandler.instance().tick();
+        ProfitCategoryDataHandler.instance().tick();
+        ProfitRewardTriggerDataHandler.instance().tick();
         CustomHudDataHandler.instance().tick();
         CustomButtonDataHandler.instance().tick();
         CustomNotificationDataHandler.instance().tick();
@@ -61,8 +64,11 @@ public class DataFileHandler extends Handler {
         }
     }
 
-    private boolean loadDataToMemory(DataModels.DataModelType dataModelType) {
+    public boolean loadDataToMemory(DataModels.DataModelType dataModelType) {
         DataModels.DataModel data = this.getData(dataModelType);
+        if (data.uuid == null) {
+            return false;
+        }
         try {
             Path configDir = getConfigDir(data.uuid);
             Files.createDirectories(configDir);
@@ -75,8 +81,9 @@ public class DataFileHandler extends Handler {
             String jsonFromFile = Files.readString(filePath);
             setData(dataModelType, jsonFromFile);
             this.isDataLoaded = true;
+            return true;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             LoggerHandler.error(e);
         }
         return false;
@@ -129,6 +136,9 @@ public class DataFileHandler extends Handler {
             case CONSTANT_DATA -> ConstantDataHandler.instance().getConstantData();
             case QUEST_DATA -> QuestDataHandler.instance().getQuestData();
             case CREW_DATA -> CrewDataHandler.instance().getCrewData();
+            case PROFIT_PRICING -> ProfitPricingDataHandler.instance().getProfitPricingData();
+            case PROFIT_CATEGORY_RULES -> ProfitCategoryDataHandler.instance().getProfitCategoryData();
+            case PROFIT_REWARD_TRIGGERS -> ProfitRewardTriggerDataHandler.instance().getProfitRewardTriggerData();
             case CUSTOM_HUD_DATA -> CustomHudDataHandler.instance().getCustomHudData();
             case CUSTOM_BUTTON_DATA -> CustomButtonDataHandler.instance().getCustomButtonData();
             case CUSTOM_NOTIFICATION_DATA -> CustomNotificationDataHandler.instance().getCustomNotificationData();
@@ -158,6 +168,12 @@ public class DataFileHandler extends Handler {
                     QuestDataHandler.instance().setQuestData(gson.fromJson(json, QuestDataHandler.QuestDataModel.class));
             case CREW_DATA ->
                     CrewDataHandler.instance().setCrewData(gson.fromJson(json, CrewDataHandler.CrewDataModel.class));
+            case PROFIT_PRICING ->
+                    ProfitPricingDataHandler.instance().setProfitPricingData(gson.fromJson(json, ProfitPricingDataHandler.ProfitPricingDataModel.class));
+            case PROFIT_CATEGORY_RULES ->
+                    ProfitCategoryDataHandler.instance().setProfitCategoryData(gson.fromJson(json, ProfitCategoryDataHandler.ProfitCategoryDataModel.class));
+            case PROFIT_REWARD_TRIGGERS ->
+                    ProfitRewardTriggerDataHandler.instance().setProfitRewardTriggerData(gson.fromJson(json, ProfitRewardTriggerDataHandler.ProfitRewardTriggerDataModel.class));
             case CUSTOM_HUD_DATA ->
                     CustomHudDataHandler.instance().setCustomHudData(gson.fromJson(json, CustomHudDataHandler.CustomHudDataModel.class));
             case CUSTOM_BUTTON_DATA ->
@@ -176,7 +192,7 @@ public class DataFileHandler extends Handler {
     /// Field, Pair<Value, Tooltip>
     protected Map<String, Pair<MutableComponent, MutableComponent>> _getFields() {
         return Map.of(
-                "isDataLoaded", Pair.of(Component.literal(Boolean.toString(isDataLoaded())), Component.empty())
+                "isDataLoaded", Pair.of(Component.literal(isDataLoaded() ? "true" : "false"), Component.empty())
         );
     }
     //endregion

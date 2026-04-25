@@ -35,7 +35,7 @@ public class InventoryHandler extends Handler {
     //region Fields
     private final List<UUID> trackedFish = new ArrayList<>();
     private NonNullList<ItemStack> snapshotInventory = NonNullList.createWithCapacity(0);
-    private List<Triplet<Long, ItemStack, Integer>> snapshottedItems = new ArrayList<>();
+    private List<InventoryGainEvent> snapshottedItems = new ArrayList<>();
     private List<Triplet<Long, ItemStack, Integer>> snapshottedRemovedItems = new ArrayList<>();
     private FishingRodTagObject currentFishingRod = FishingRodTagObject.empty();
     private PetTagObject currentPet = PetTagObject.empty();
@@ -52,12 +52,12 @@ public class InventoryHandler extends Handler {
         return snapshotInventory.isEmpty() ? NonNullList.createWithCapacity(0) : snapshotInventory;
     }
 
-    public List<Triplet<Long, ItemStack, Integer>> getSnapshottedItems() {
+    public List<InventoryGainEvent> getSnapshottedItems() {
         return snapshottedItems;
     }
 
     public List<ItemStack> getSnapshottedItemstacks() {
-        return this.snapshottedItems.stream().map(Triplet::value2).toList();
+        return this.snapshottedItems.stream().map(InventoryGainEvent::getItemStack).toList();
     }
 
     protected void setCurrentFishingRod(FishingRodTagObject currentFishingRod) {
@@ -310,13 +310,17 @@ public class InventoryHandler extends Handler {
     }
 
     private void checkSnapshottedItems() {
-        snapshottedItems.removeIf(item -> item.value1() > System.currentTimeMillis() + 1000L);
-        snapshottedRemovedItems.removeIf(item -> item.value1() > System.currentTimeMillis() + 60L + NetworkHandler.instance().getPing());
+        long now = System.currentTimeMillis();
+        snapshottedItems.removeIf(item -> now - item.getTime() > 1000L);
+        snapshottedRemovedItems.removeIf(item -> now - item.value1() > 60L + NetworkHandler.instance().getPing());
     }
 
     private void addToSnapshotItems(ItemStack newStack, int count) {
+        if (count <= 0) {
+            return;
+        }
         LoggerHandler._debug("Snapshotted Item: " + newStack.getHoverName().getString() + " at " + System.currentTimeMillis());
-        snapshottedItems.add(Triplet.of(System.currentTimeMillis(), newStack, count));
+        snapshottedItems.add(new InventoryGainEvent(System.currentTimeMillis(), newStack, count));
     }
 
     private void addToRemovedSnapshotItems(ItemStack oldStack, int slot) {
@@ -430,4 +434,37 @@ public class InventoryHandler extends Handler {
         );
     }
     //endregion
+
+    public static class InventoryGainEvent {
+        private final long time;
+        private final ItemStack itemStack;
+        private final int count;
+        private boolean profitCounted;
+
+        public InventoryGainEvent(long time, ItemStack itemStack, int count) {
+            this.time = time;
+            this.itemStack = itemStack;
+            this.count = count;
+        }
+
+        public long getTime() {
+            return time;
+        }
+
+        public ItemStack getItemStack() {
+            return itemStack;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public boolean isProfitCounted() {
+            return profitCounted;
+        }
+
+        public void markProfitCounted() {
+            this.profitCounted = true;
+        }
+    }
 }
