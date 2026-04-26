@@ -1,6 +1,7 @@
 package dannypx.foe.screens.widget;
 
 import dannypx.foe.mixin.accessor.AbstractSelectionListAccessor;
+import dannypx.foe.mixin.accessor.AbstractSelectionListEntryAccessor;
 import dannypx.foe.screens.interfaces.ScreenConstants;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,11 +58,25 @@ public class ButtonListWidget extends AbstractSelectionList<ButtonListWidget.@No
 
     @Override
     public int addEntry(ButtonEntry entry) {
-        return super.addEntry(entry);
+        entry.setX(this.getRowLeft());
+        entry.setWidth(this.getRowWidth());
+        entry.setY(this.getNextY());
+        entry.setHeight(this.defaultEntryHeight);
+
+        ((AbstractSelectionListAccessor) this).getChildren().add(entry);
+        ((AbstractSelectionListAccessor) this).callRepositionEntries();
+        return this.children().size() - 1;
     }
 
-    public int addEntry(ButtonEntry entry, int pos) {
-        return super.addEntry(entry, pos - 1);
+    public int addEntryAtPos(ButtonEntry entry, int pos) {
+        entry.setX(this.getRowLeft());
+        entry.setWidth(this.getRowWidth());
+        entry.setY(this.getNextY());
+        entry.setHeight(this.defaultEntryHeight);
+
+        ((AbstractSelectionListAccessor) this).getChildren().add(pos, entry);
+        ((AbstractSelectionListAccessor) this).callRepositionEntries();
+        return this.children().size() - 1;
     }
 
     public void swapUp(int pos) {

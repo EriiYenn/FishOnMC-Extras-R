@@ -10,7 +10,7 @@ import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedBoolean;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-@Version(version = 6)
+@Version(version = 7)
 @Translatable.Name("§7§oDev§8§o: §f§oMixin Toggles")
 @Translatable.Desc("§4WARNING §7These are the toggles to mixins. Do not touch these unless you know what you are doing")
 public class MixinConfig extends Config {
@@ -89,12 +89,6 @@ public class MixinConfig extends Config {
 
     @ConfigGroup.Pop
     public ValidatedBoolean abstractRecipeBookScreenMixinAddRecipeBook = new ValidatedBoolean(true);
-
-    @Name("AbstractSelectionList Mixin")
-    public ConfigGroup abstractSelectionListMixinGroup = new ConfigGroup("abstract_selection_list");
-
-    @ConfigGroup.Pop
-    public ValidatedBoolean abstractSelectionListMixinAddEntry = new ValidatedBoolean(true);
 
     @Name("ContextualBarRenderer Mixin")
     public ConfigGroup contextualBarRendererMixinGroup = new ConfigGroup("contextual_bar_renderer_mixin");

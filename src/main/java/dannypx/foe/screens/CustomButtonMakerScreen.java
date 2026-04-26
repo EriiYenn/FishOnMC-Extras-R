@@ -508,7 +508,7 @@ public class CustomButtonMakerScreen extends Screen implements ScreenConstants {
 
                                     ButtonListWidget.ButtonEntry buttonEntry = createButtonEntry(newId);
 
-                                    buttonList.addEntry(buttonEntry, pos);
+                                    buttonList.addEntryAtPos(buttonEntry, pos);
                                     buttonEntryMap.put(newId, buttonEntry);
                                 }))
                         .width(25)
