@@ -5,6 +5,7 @@ import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.io.DataFileHandler;
 import dannypx.foe.handler.io.DataModels;
 import dannypx.foe.item.TagObject;
+import dannypx.foe.item.ValidateItem;
 import dannypx.foe.type.tuple.Pair;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -108,8 +109,15 @@ public class ProfitCategoryDataHandler extends Handler {
                 continue;
             }
             if (rule.regex.matcher(combinedText).find()) {
+                if (isFishForCategoryRules(tag) && namePatternWouldLeaveFishCategory(rule)) {
+                    continue;
+                }
                 return rule.toCategoryRule();
             }
+        }
+
+        if (skipsRarityMapOverride(tag)) {
+            return null;
         }
 
         String rarity = normalizeKey(tag.getRarity());
@@ -121,6 +129,43 @@ public class ProfitCategoryDataHandler extends Handler {
             }
         }
         return null;
+    }
+
+    /**
+     * Fish and shards get their own breakdown categories from heuristics; {@code rarityMap} is for other gear
+     * so epic+ fish/shards are not forced into Rare Items.
+     */
+    private static boolean skipsRarityMapOverride(TagObject tag) {
+        return isFishForCategoryRules(tag) || isShardForCategoryRules(tag);
+    }
+
+    private static boolean isFishForCategoryRules(TagObject tag) {
+        return "fish".equalsIgnoreCase(tag.getType()) || ValidateItem.isFish(tag.getItemStack()).value1();
+    }
+
+    /** Matches {@link dannypx.foe.handler.logic.ProfitSourceClassifier} shard heuristic (name contains "shard", not fish). */
+    private static boolean isShardForCategoryRules(TagObject tag) {
+        if (isFishForCategoryRules(tag)) {
+            return false;
+        }
+        String name = tag.getName().getString();
+        if (name == null || name.isBlank()) {
+            return false;
+        }
+        String normalized = name.trim().replaceAll("[_\\-]+", " ").replaceAll("\\s+", " ").toLowerCase(Locale.US);
+        return normalized.contains("shard");
+    }
+
+    /**
+     * Rare-item (and similar) name rules match on name + lore; fish lore can contain overlapping words.
+     * Only apply a pattern to fish when it keeps category {@code fish} (blank category = sub-only override).
+     */
+    private static boolean namePatternWouldLeaveFishCategory(NamePatternRule rule) {
+        String category = rule.category;
+        if (category == null || category.isBlank()) {
+            return false;
+        }
+        return !normalizeKey(category).equals("fish");
     }
 
     private CategoryRule findByItemId(TagObject tag) {

@@ -85,7 +85,7 @@ public final class ProfitSourceClassifier {
         }
 
         if (tag instanceof FishTagObject fish && !fish.getFish().isBlank()) {
-            return "Other";
+            return prettify(fish.getFish());
         }
         return "Other";
     }
