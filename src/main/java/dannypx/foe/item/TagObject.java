@@ -9,7 +9,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -217,38 +216,20 @@ public class TagObject {
     }
 
     public float getMoney() {
-        float best = readNumericMoneyKey(this.compoundTag);
         ListTag renderInfo = this.getRenderInfo();
-        for (int i = 0; i < renderInfo.size(); i++) {
-            Tag t = renderInfo.get(i);
-            if (t instanceof CompoundTag ct) {
-                float v = readNumericMoneyKey(ct);
-                if (v > best) {
-                    best = v;
-                }
+        if(!renderInfo.isEmpty()) {
+            if(((CompoundTag) renderInfo.getFirst()).contains(MONEY)) {
+                return ((CompoundTag) renderInfo.getFirst()).getFloat(MONEY).orElse(0.0f);
             }
-        }
-        return best;
-    }
-
-    private static float readNumericMoneyKey(CompoundTag ct) {
-        if (ct == null || !ct.contains(MONEY)) {
-            return 0f;
-        }
-        Tag t = ct.get(MONEY);
-        if (t instanceof NumericTag num) {
-            return (float) num.doubleValue();
         }
         return 0f;
     }
 
     protected boolean isAuctionItem() {
         ListTag listTag = this.getRenderInfo();
-        for (int i = 0; i < listTag.size(); i++) {
-            Tag t = listTag.get(i);
-            if (t instanceof CompoundTag ct && ct.contains(MONEY)) {
-                return true;
-            }
+
+        if(!listTag.isEmpty()) {
+            return ((CompoundTag) listTag.getFirst()).contains(MONEY);
         }
         return false;
     }

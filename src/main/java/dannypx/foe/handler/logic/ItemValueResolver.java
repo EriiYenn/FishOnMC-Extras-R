@@ -5,6 +5,10 @@ import dannypx.foe.item.TagObject;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -18,7 +22,7 @@ public final class ItemValueResolver {
     private ItemValueResolver() {}
 
     public static float unitValueFor(TagObject tag) {
-        float fromNbt = tag.getMoney();
+        float fromNbt = profitMoneyFromNbt(tag);
         if (fromNbt > 0f) {
             return fromNbt;
         }
@@ -39,6 +43,30 @@ public final class ItemValueResolver {
             return fromLore;
         }
         return 0f;
+    }
+
+    /**
+     * Fish on MC can store {@link TagObject#MONEY} on the root tag or in later {@code renderInfo} compounds.
+     * Keeps {@link TagObject#getMoney()} aligned with upstream (first renderInfo entry only); profit uses the max here.
+     */
+    private static float profitMoneyFromNbt(TagObject tag) {
+        float best = 0f;
+        if (tag.contains(TagObject.MONEY)) {
+            best = Math.max(best, tag.getFloat(TagObject.MONEY));
+        }
+        ListTag renderInfo = tag.getRenderInfo();
+        for (int i = 0; i < renderInfo.size(); i++) {
+            Tag t = renderInfo.get(i);
+            if (t instanceof CompoundTag ct && ct.contains(TagObject.MONEY)) {
+                Tag moneyTag = ct.get(TagObject.MONEY);
+                if (moneyTag instanceof NumericTag num) {
+                    best = Math.max(best, (float) num.doubleValue());
+                } else {
+                    best = Math.max(best, ct.getFloat(TagObject.MONEY).orElse(0f));
+                }
+            }
+        }
+        return best;
     }
 
     /**
