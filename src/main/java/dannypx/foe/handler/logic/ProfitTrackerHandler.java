@@ -187,26 +187,29 @@ public class ProfitTrackerHandler extends Handler {
                         bucket.id,
                         bucket.label,
                         bucket.total,
+                        bucket.itemCount,
                         sessionTotal <= 0d ? 0d : bucket.total * 100d / sessionTotal,
                         sortedBuckets(bucket.children).stream()
-                                .map(child -> new ProfitBreakdownSubRow(child.id, child.label, child.total))
+                                .map(child -> new ProfitBreakdownSubRow(child.id, child.label, child.total, child.itemCount))
                                 .toList()
                 ))
                 .toList();
     }
 
-    private void addBreakdown(ProfitSourceClassifier.ProfitSource source, double add) {
+    private void addBreakdown(ProfitSourceClassifier.ProfitSource source, double add, long itemCount) {
         BreakdownBucket category = categoryBreakdown.computeIfAbsent(
                 source.categoryId,
                 key -> new BreakdownBucket(source.categoryId, source.categoryLabel)
         );
         category.total += add;
+        category.itemCount += itemCount;
 
         BreakdownBucket subBucket = category.children.computeIfAbsent(
                 source.subId,
                 key -> new BreakdownBucket(source.subId, source.subLabel)
         );
         subBucket.total += add;
+        subBucket.itemCount += itemCount;
     }
 
     private double categoryTotal(String categoryId) {
@@ -270,6 +273,7 @@ public class ProfitTrackerHandler extends Handler {
         private final String id;
         private final String label;
         private double total;
+        private long itemCount;
         private final Map<String, BreakdownBucket> children = new LinkedHashMap<>();
 
         private BreakdownBucket(String id, String label) {
@@ -282,13 +286,21 @@ public class ProfitTrackerHandler extends Handler {
         public final String id;
         public final String label;
         public final double total;
+        public final long itemCount;
         public final double percentOfSession;
         public final List<ProfitBreakdownSubRow> subRows;
 
-        public ProfitBreakdownCategoryRow(String id, String label, double total, double percentOfSession, List<ProfitBreakdownSubRow> subRows) {
+        public ProfitBreakdownCategoryRow(
+                String id,
+                String label,
+                double total,
+                long itemCount,
+                double percentOfSession,
+                List<ProfitBreakdownSubRow> subRows) {
             this.id = id;
             this.label = label;
             this.total = total;
+            this.itemCount = itemCount;
             this.percentOfSession = percentOfSession;
             this.subRows = subRows;
         }
@@ -298,11 +310,13 @@ public class ProfitTrackerHandler extends Handler {
         public final String id;
         public final String label;
         public final double total;
+        public final long itemCount;
 
-        public ProfitBreakdownSubRow(String id, String label, double total) {
+        public ProfitBreakdownSubRow(String id, String label, double total, long itemCount) {
             this.id = id;
             this.label = label;
             this.total = total;
+            this.itemCount = itemCount;
         }
     }
 }

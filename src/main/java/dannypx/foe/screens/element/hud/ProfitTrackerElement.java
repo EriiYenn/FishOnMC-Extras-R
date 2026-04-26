@@ -15,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public class ProfitTrackerElement extends Element {
     private static final int PADDING = 6;
@@ -155,6 +156,12 @@ public class ProfitTrackerElement extends Element {
 
     private static String formatPercent(double percent) {
         return String.format(Locale.US, "%.0f%%", percent);
+    }
+
+    private static void appendItemCount(MutableComponent line, long itemCount, ChatFormatting style) {
+        if (itemCount > 0L) {
+            line.append(Component.literal(" \u00B7 " + itemCount).withStyle(style));
+        }
     }
 
     private static class Layout {
