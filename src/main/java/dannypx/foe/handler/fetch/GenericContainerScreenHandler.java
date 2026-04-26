@@ -15,6 +15,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 
 public class GenericContainerScreenHandler extends Handler {
@@ -58,10 +59,8 @@ public class GenericContainerScreenHandler extends Handler {
 
         if (Objects.equals(genericContainerScreen.getTitle().getString(), QUEST_SCREEN_CONTAINER)) {
             QuestScreenHandler.instance().init(genericContainerScreen);
-//            QuestScreenHandler.instance().checkQuests(genericContainerScreen.getMenu());
         } else if (Objects.equals(genericContainerScreen.getTitle().getString(), STATS_SCREEN_CONTAINER)) {
             StatsScreenHandler.instance().init(genericContainerScreen);
-//            StatsScreenHandler.instance().checkStats(genericContainerScreen.getMenu());
         } else if (Objects.equals(genericContainerScreen.getTitle().getString(), AUCTION_HOUSE_SCREEN_CONTAINER)) {
             AuctionHouseScreenRenderHandler.instance().init(genericContainerScreen);
         } else if (genericContainerScreen.getTitle().getString().startsWith(PERSONAL_VAULT_SCREEN_CONTAINER)) {
@@ -79,7 +78,7 @@ public class GenericContainerScreenHandler extends Handler {
 
     private void checkIsOfItem(ContainerScreen genericContainerScreen) {
         CodeExecuterHandler.runLater(2, () -> {
-            net.minecraft.world.inventory.ChestMenu genericContainerScreenHandler = genericContainerScreen.getMenu();
+            ChestMenu genericContainerScreenHandler = genericContainerScreen.getMenu();
 
             // Crew Info
             ItemStack crewInfoStack = genericContainerScreenHandler.getSlot(13).getItem();
