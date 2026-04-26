@@ -16,7 +16,7 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedNumber;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-@Version(version = 4)
+@Version(version = 5)
 @Translatable.Name("HUD Configuration")
 @Translatable.Desc("§7Configure HUD elements")
 public class HUDConfig extends Config {
