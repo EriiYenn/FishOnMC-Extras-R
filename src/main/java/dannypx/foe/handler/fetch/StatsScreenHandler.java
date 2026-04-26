@@ -2,6 +2,7 @@ package dannypx.foe.handler.fetch;
 
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.logic.CodeExecuterHandler;
+import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.handler.logic.NotifierHandler;
 import dannypx.foe.handler.store.ConstantDataHandler;
 import dannypx.foe.handler.store.ProfileDataHandler;
@@ -25,6 +26,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class StatsScreenHandler extends Handler {
     private static StatsScreenHandler INSTANCE = new StatsScreenHandler();
@@ -61,7 +63,7 @@ public class StatsScreenHandler extends Handler {
 
     public void tick(ContainerScreen screen) {
         if(!isScanned
-                && screen.getMenu().slots.get(12).getItem().is(ItemTags.SHULKER_BOXES)
+                && screen.getMenu().slots.get(23).getItem().getItem() == Items.KNOWLEDGE_BOOK
         ) {
             isScanned = true;
             this.checkStats(screen.getMenu());
