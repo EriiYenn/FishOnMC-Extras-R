@@ -192,7 +192,10 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
                 // Logic
                 if(Configs.handlerConfig.keyBindHandler.get()) KeyBindHandler.instance().tick();
                 if(Configs.handlerConfig.catchingHandler.get()) CatchingHandler.instance().tick();
-                ProfitRewardAttributionHandler.instance().tick();
+                if (Configs.handlerConfig.trackQuestProfit.get()
+                        || Configs.handlerConfig.trackCompetitionProfit.get()) {
+                    ProfitRewardAttributionHandler.instance().tick();
+                }
                 if(Configs.handlerConfig.rayCastHandler.get()) HitResultHandler.instance().tick();
                 if(Configs.handlerConfig.notifierHandler.get()) NotifierHandler.instance().tick();
                 if(Configs.handlerConfig.crewHandler.get()) CrewHandler.instance().tick();

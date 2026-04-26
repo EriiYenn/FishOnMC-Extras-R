@@ -138,12 +138,20 @@ public class ProfitRewardAttributionHandler extends Handler {
                     continue;
                 }
 
+                if (!hasActiveContextFor(kind)) {
+                    return;
+                }
+
                 this.mergeOrOpenForKind(kind);
                 ProfitTrackerHandler.instance().recordMoneyReward(amount, kind.moneySource());
                 LoggerHandler._debug("Profit tracker attributed $" + amount + " to " + kind.categoryLabel);
                 return;
             }
         }
+    }
+
+    private boolean hasActiveContextFor(RewardContextKind kind) {
+        return activeContext.isActive() && activeContext.kind() == kind;
     }
 
     private static float extractAmount(Matcher matcher) {

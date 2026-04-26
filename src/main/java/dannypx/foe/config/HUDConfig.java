@@ -109,6 +109,7 @@ public class HUDConfig extends Config {
     public ConfigGroup profitTrackerElementGroup = new ConfigGroup("profit_tracker_element_group");
 
     @Name("Show Profit Tracker")
+    @Desc("§7When off, the HUD is hidden and the profit session is not updated (catches and reward money are ignored)")
     public ValidatedBoolean showProfitTrackerElement = new ValidatedBoolean(true);
 
     @Name("Show Breakdown")

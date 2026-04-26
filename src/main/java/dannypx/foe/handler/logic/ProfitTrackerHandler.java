@@ -1,5 +1,6 @@
 package dannypx.foe.handler.logic;
 
+import dannypx.foe.config.Configs;
 import dannypx.foe.handler.Handler;
 import dannypx.foe.helper.ComponentHelper;
 import dannypx.foe.item.FishTagObject;
@@ -56,13 +57,19 @@ public class ProfitTrackerHandler extends Handler {
         if (count <= 0) {
             return;
         }
+        if (!profitTrackerHudEnabled()) {
+            return;
+        }
         float unit = ItemValueResolver.unitValueFor(tag);
         double add = unit * (double) count;
         sessionTotal += add;
         lastCatchValue = add;
         lastCatchLabel = tag.getName().plainCopy();
         if (add > 0d) {
-            this.addBreakdown(sourceOverride == null ? ProfitSourceClassifier.classify(tag) : sourceOverride, add);
+            this.addBreakdown(
+                    sourceOverride == null ? ProfitSourceClassifier.classify(tag) : sourceOverride,
+                    add,
+                    count);
         }
     }
 
@@ -74,10 +81,13 @@ public class ProfitTrackerHandler extends Handler {
         if (amount <= 0d || source == null) {
             return;
         }
+        if (!profitTrackerHudEnabled()) {
+            return;
+        }
         sessionTotal += amount;
         lastCatchValue = amount;
         lastCatchLabel = Component.literal(source.categoryLabel + " reward");
-        this.addBreakdown(source, amount);
+        this.addBreakdown(source, amount, 0L);
     }
 
     public Pair<Boolean, PlaceholderValue> getProfitTracker(String[] params) {
@@ -128,6 +138,10 @@ public class ProfitTrackerHandler extends Handler {
                     : PlaceholderHandler.getPlaceholderValue(new StringValue(lastCatchNameTruncated()));
             default -> PlaceholderHandler.noResult();
         };
+    }
+
+    private static boolean profitTrackerHudEnabled() {
+        return Configs.hudConfig.showProfitTrackerElement.get();
     }
 
     private double perHour() {
