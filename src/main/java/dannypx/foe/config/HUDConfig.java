@@ -118,11 +118,15 @@ public class HUDConfig extends Config {
     @Name("Show Subcategories")
     public ValidatedBoolean showProfitTrackerBreakdownSubcategories = new ValidatedBoolean(true);
 
+    @Name("Profit Tracking (experimental)")
+    @Desc("§7Show session money, per-hour, last value, and breakdown money numbers; when off, the tracker shows names and counts only")
+    public ValidatedBoolean profitTrackingExperimental = new ValidatedBoolean(false);
+
     @Name("Max Categories")
-    public ValidatedInt profitTrackerBreakdownMaxCategories = new ValidatedInt(4, 8, 1, ValidatedNumber.WidgetType.SLIDER);
+    public ValidatedInt profitTrackerBreakdownMaxCategories = new ValidatedInt(8, 8, 1, ValidatedNumber.WidgetType.SLIDER);
 
     @Name("Max Subcategories")
-    public ValidatedInt profitTrackerBreakdownMaxSubcategories = new ValidatedInt(2, 6, 0, ValidatedNumber.WidgetType.SLIDER);
+    public ValidatedInt profitTrackerBreakdownMaxSubcategories = new ValidatedInt(16, 16, 0, ValidatedNumber.WidgetType.SLIDER);
 
     @Name("X Position in %")
     public ValidatedInt profitTrackerElementXPosition = new ValidatedInt(1, 100, 0, ValidatedNumber.WidgetType.SLIDER);

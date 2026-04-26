@@ -106,21 +106,30 @@ public class ProfitTrackerElement extends Element {
 
     private static Layout buildLayout(Font font, ProfitTrackerHandler handler) {
         List<Component> lines = new ArrayList<>();
-        lines.add(Component.literal("Profit").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
-        lines.add(Component.literal("")
-                .append(Component.literal("Session ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.literal(handler.sessionTotalFormatted()).withStyle(ChatFormatting.WHITE)));
-        lines.add(Component.literal("")
-                .append(Component.literal("/hr ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.literal(handler.perHourFormatted()).withStyle(ChatFormatting.AQUA)));
-        lines.add(Component.literal("")
-                .append(Component.literal("Last ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.literal(handler.lastCatchFormatted()).withStyle(ChatFormatting.GREEN))
-                .append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.literal(handler.lastCatchNameTruncated()).withStyle(ChatFormatting.GRAY)));
+        boolean peaceful = !Configs.hudConfig.profitTrackingExperimental.get();
+        lines.add(Component.literal(peaceful ? "Tracker" : "Profit").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+        if (!peaceful) {
+            lines.add(Component.literal("")
+                    .append(Component.literal("Session ").withStyle(ChatFormatting.DARK_GRAY))
+                    .append(Component.literal(handler.sessionTotalFormatted()).withStyle(ChatFormatting.WHITE)));
+            lines.add(Component.literal("")
+                    .append(Component.literal("/hr ").withStyle(ChatFormatting.DARK_GRAY))
+                    .append(Component.literal(handler.perHourFormatted()).withStyle(ChatFormatting.AQUA)));
+            lines.add(Component.literal("")
+                    .append(Component.literal("Last ").withStyle(ChatFormatting.DARK_GRAY))
+                    .append(Component.literal(handler.lastCatchFormatted()).withStyle(ChatFormatting.GREEN))
+                    .append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
+                    .append(Component.literal(handler.lastCatchNameTruncated()).withStyle(ChatFormatting.GRAY)));
+        } else if (!"—".equals(handler.lastCatchNameTruncated())) {
+            lines.add(Component.literal("")
+                    .append(Component.literal("Last ").withStyle(ChatFormatting.DARK_GRAY))
+                    .append(Component.literal(handler.lastCatchNameTruncated()).withStyle(ChatFormatting.GRAY)));
+        }
 
         if (Configs.hudConfig.showProfitTrackerBreakdown.get() && handler.hasBreakdown()) {
-            lines.add(Component.literal("Sources").withStyle(ChatFormatting.YELLOW));
+            if (!peaceful) {
+                lines.add(Component.literal("Sources").withStyle(ChatFormatting.YELLOW));
+            }
 
             int maxCategories = Configs.hudConfig.profitTrackerBreakdownMaxCategories.get();
             int maxSubcategories = Configs.hudConfig.profitTrackerBreakdownMaxSubcategories.get();
@@ -129,18 +138,30 @@ public class ProfitTrackerElement extends Element {
             List<ProfitTrackerHandler.ProfitBreakdownCategoryRow> rows = handler.getBreakdownRows();
             for (int i = 0; i < Math.min(maxCategories, rows.size()); i++) {
                 ProfitTrackerHandler.ProfitBreakdownCategoryRow row = rows.get(i);
-                lines.add(Component.literal("")
-                        .append(Component.literal(row.label + " ").withStyle(ChatFormatting.GRAY))
-                        .append(Component.literal(ProfitTrackerHandler.formatValue(row.total)).withStyle(ChatFormatting.WHITE))
-                        .append(Component.literal(" (" + formatPercent(row.percentOfSession) + ")").withStyle(ChatFormatting.DARK_GRAY)));
+                MutableComponent categoryLine = Component.literal("")
+                        .append(Component.literal(row.label).withStyle(ChatFormatting.GRAY));
+                if (!peaceful) {
+                    categoryLine
+                            .append(Component.literal(" ").withStyle(ChatFormatting.GRAY))
+                            .append(Component.literal(ProfitTrackerHandler.formatValue(row.total)).withStyle(ChatFormatting.WHITE))
+                            .append(Component.literal(" (" + formatPercent(row.percentOfSession) + ")").withStyle(ChatFormatting.DARK_GRAY));
+                }
+                appendItemCount(categoryLine, row.itemCount, ChatFormatting.DARK_GRAY);
+                lines.add(categoryLine);
 
                 if (showSubs) {
                     for (int j = 0; j < Math.min(maxSubcategories, row.subRows.size()); j++) {
                         ProfitTrackerHandler.ProfitBreakdownSubRow subRow = row.subRows.get(j);
-                        lines.add(Component.literal("")
+                        MutableComponent subLine = Component.literal("")
                                 .append(Component.literal("  ").withStyle(ChatFormatting.DARK_GRAY))
-                                .append(Component.literal(subRow.label + " ").withStyle(ChatFormatting.DARK_GRAY))
-                                .append(Component.literal(ProfitTrackerHandler.formatValue(subRow.total)).withStyle(ChatFormatting.GRAY)));
+                                .append(Component.literal(subRow.label).withStyle(ChatFormatting.DARK_GRAY));
+                        if (!peaceful) {
+                            subLine
+                                    .append(Component.literal(" ").withStyle(ChatFormatting.DARK_GRAY))
+                                    .append(Component.literal(ProfitTrackerHandler.formatValue(subRow.total)).withStyle(ChatFormatting.GRAY));
+                        }
+                        appendItemCount(subLine, subRow.itemCount, ChatFormatting.DARK_GRAY);
+                        lines.add(subLine);
                     }
                 }
             }
