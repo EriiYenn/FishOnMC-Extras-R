@@ -30,6 +30,9 @@ public class KeyBindConfig extends Config {
     @Name("Inspect Key")
     public ValidatedKeybind inspectKeybind = new ValidatedKeybind(GLFW.GLFW_KEY_LEFT_SHIFT, ContextInput.KEYBOARD, false, false, false);
 
+    @Name("Reset profit session")
+    public ValidatedKeybind resetProfitTrackerKeybind = new ValidatedKeybind(GLFW.GLFW_KEY_UNKNOWN, ContextInput.KEYBOARD, false, false, false);
+
     @ConfigGroup.Pop
     @Name("Button mode")
     public ValidatedEnum<KeyBindMode> inspectMode = new ValidatedEnum<>(KeyBindMode.HOLD, ValidatedEnum.WidgetType.CYCLING);

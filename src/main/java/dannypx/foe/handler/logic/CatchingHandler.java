@@ -122,6 +122,8 @@ public class CatchingHandler extends Handler {
                 QuestDataHandler.instance().setFish(foundFish.value2());
                 LoggerHandler._debug("Found Fish: " + foundFish.value2().getName().getString());
 
+                ProfitTrackerHandler.instance().recordFishCatch(foundFish.value2());
+
                 CodeExecuterHandler.runLater(Configs.handlerConfig.catchingItemsDelayCheck.get(), this::checkForCaughtItems);
 
                 lastDataFish = prevStats;
@@ -140,18 +142,29 @@ public class CatchingHandler extends Handler {
         LoggerHandler._debug("Search Window: " + (Configs.handlerConfig.catchingItemsCheckWindow.get() + (System.currentTimeMillis() - startScanTime)));
         if(minecraft.player != null) {
             InventoryHandler.instance().getSnapshottedItems().stream()
-                    .filter(item -> System.currentTimeMillis() - item.value1()
+                    .filter(item -> !item.isProfitCounted())
+                    .filter(item -> System.currentTimeMillis() - item.getTime()
                             < Configs.handlerConfig.catchingItemsCheckWindow.get() + (System.currentTimeMillis() - startScanTime))
-                    .toList().forEach(item -> scanItem(item.value2(), item.value3()));
+                    .toList().forEach(this::scanItem);
         }
     }
 
-    private void scanItem(ItemStack itemStack, int count) {
+    private void scanItem(InventoryHandler.InventoryGainEvent itemEvent) {
+        ItemStack itemStack = itemEvent.getItemStack();
+        int count = itemEvent.getCount();
         Pair<Boolean, TagObject> validatedItem = ValidateItem.isType(itemStack);
 
         if(validatedItem.value1()) {
             // Store to Stats
             StatsDataHandler.instance().setItem(validatedItem.value2(), count);
+
+            if (!ValidateItem.isFish(validatedItem.value2().getItemStack()).value1()) {
+                if (count > 1) {
+                    LoggerHandler._debug("Profit tracker counted " + count + "x " + itemStack.getHoverName().getString(), itemStack);
+                }
+                ProfitTrackerHandler.instance().recordCatch(validatedItem.value2(), count);
+                itemEvent.markProfitCounted();
+            }
 
             LoggerHandler._debug("Found Item: " + itemStack.getHoverName().getString(), itemStack);
         }

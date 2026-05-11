@@ -4,6 +4,7 @@ import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.logic.CodeExecuterHandler;
 import dannypx.foe.handler.logic.NotifierHandler;
 import dannypx.foe.handler.logic.PlaceholderHandler;
+import dannypx.foe.handler.logic.ProfitRewardAttributionHandler;
 import dannypx.foe.handler.store.CustomChatTriggerDataHandler;
 import dannypx.foe.handler.store.ProfileDataHandler;
 import dannypx.foe.helper.ComponentHelper;
@@ -75,6 +76,7 @@ public class ChatHandler extends Handler {
         if(this.inBlackList(component)) return;
         
         this.checkPet(component);
+        ProfitRewardAttributionHandler.instance().onChatMessage(component);
         this.checkChatTrigger(component);
     }
 

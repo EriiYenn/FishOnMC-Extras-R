@@ -16,7 +16,7 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedNumber;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-@Version(version = 3)
+@Version(version = 5)
 @Translatable.Name("HUD Configuration")
 @Translatable.Desc("§7Configure HUD elements")
 public class HUDConfig extends Config {
@@ -103,6 +103,44 @@ public class HUDConfig extends Config {
     @ConfigGroup.Pop
     @Name("Show Tacklebox Lock")
     public ValidatedBoolean showBaitLock = new ValidatedBoolean(true);
+
+    @Name("Profit Tracker")
+    @Desc("§7Session fishing profit. Custom prices, category rules, and reward chat triggers live in config/fishonmcextras/data/<uuid>/profit_pricing.json, profit_categories.json, and profit_reward_triggers.json; use Main Screen -> Reload Profit Data after editing")
+    public ConfigGroup profitTrackerElementGroup = new ConfigGroup("profit_tracker_element_group");
+
+    @Name("Show Profit Tracker")
+    @Desc("§7When off, the HUD is hidden and the profit session is not updated (catches and reward money are ignored)")
+    public ValidatedBoolean showProfitTrackerElement = new ValidatedBoolean(true);
+
+    @Name("Show Breakdown")
+    public ValidatedBoolean showProfitTrackerBreakdown = new ValidatedBoolean(true);
+
+    @Name("Show Subcategories")
+    public ValidatedBoolean showProfitTrackerBreakdownSubcategories = new ValidatedBoolean(true);
+
+    @Name("Profit Tracking (experimental)")
+    @Desc("§7Show session money, per-hour, last value, and breakdown money numbers; when off, the tracker shows names and counts only")
+    public ValidatedBoolean profitTrackingExperimental = new ValidatedBoolean(false);
+
+    @Name("Max Categories")
+    public ValidatedInt profitTrackerBreakdownMaxCategories = new ValidatedInt(8, 8, 1, ValidatedNumber.WidgetType.SLIDER);
+
+    @Name("Max Subcategories")
+    public ValidatedInt profitTrackerBreakdownMaxSubcategories = new ValidatedInt(16, 16, 0, ValidatedNumber.WidgetType.SLIDER);
+
+    @Name("X Position in %")
+    public ValidatedInt profitTrackerElementXPosition = new ValidatedInt(1, 100, 0, ValidatedNumber.WidgetType.SLIDER);
+
+    @Name("Y Position in %")
+    public ValidatedInt profitTrackerElementYPosition = new ValidatedInt(28, 100, 0, ValidatedNumber.WidgetType.SLIDER);
+
+    @Name("Anchor point")
+    public ValidatedChoice<Alignment> profitTrackerElementAlignment = new ValidatedChoice<>(Alignment.TOP_LEFT, Alignment.getCorners(), new ValidatedEnum<>(Alignment.class).instanceEntry(), ValidatedChoice.WidgetType.CYCLING);
+
+    @ConfigGroup.Pop
+    @Name("Scale")
+    @Desc("§7This will scale based on the ratio. So 0.5 would be half the size")
+    public ValidatedFloat profitTrackerElementScale = ValidatedNumber.withIncrement(new ValidatedFloat(1.0f, 2.0f, 0.1f), 0.05f);
 
     @Name("Pet Element")
     @Desc("§7This is your pet shown on the hud. (Name, Level, Picture)")

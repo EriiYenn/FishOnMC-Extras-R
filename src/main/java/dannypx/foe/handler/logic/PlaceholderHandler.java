@@ -56,7 +56,8 @@ public class PlaceholderHandler extends Handler {
             Map.entry("profile_data", params -> ProfileDataHandler.instance().getProfileData(params)),
             Map.entry("quest_data", params -> QuestDataHandler.instance().getQuestData(params)),
             Map.entry("stats_data", params -> StatsDataHandler.instance().getStatsData(params)),
-            Map.entry("crew_data", params -> CrewDataHandler.instance().getCrewData(params))
+            Map.entry("crew_data", params -> CrewDataHandler.instance().getCrewData(params)),
+            Map.entry("profit_tracker", params -> ProfitTrackerHandler.instance().getProfitTracker(params))
     );
 
     private static final Map<String, Function<FunctionParser.FunctionPlaceholder, Pair<Boolean, PlaceholderValue>>> functionPlaceholders = Map.ofEntries(

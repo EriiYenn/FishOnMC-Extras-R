@@ -32,7 +32,7 @@ public class KeyBindHandler extends Handler {
 
     public Pair<Boolean, PlaceholderValue> getKeyBind(String[] params) {
         if(params.length > 0) {
-            Pattern fieldPattern = Pattern.compile("^(open_main_keybind|inspect_keybind)$");
+            Pattern fieldPattern = Pattern.compile("^(open_main_keybind|inspect_keybind|reset_profit_tracker_keybind)$");
 
             if(fieldPattern.matcher(params[0]).matches()
                     && params.length == 1
@@ -40,6 +40,7 @@ public class KeyBindHandler extends Handler {
                 return switch(params[0]) {
                     case "open_main_keybind" -> PlaceholderHandler.getPlaceholderValue(new StringValue(KeyBindHelper.getKeyString(Configs.keyBindConfig.openMainKeybind)));
                     case "inspect_keybind" -> PlaceholderHandler.getPlaceholderValue(new StringValue(KeyBindHelper.getKeyString(Configs.keyBindConfig.inspectKeybind)));
+                    case "reset_profit_tracker_keybind" -> PlaceholderHandler.getPlaceholderValue(new StringValue(KeyBindHelper.getKeyString(Configs.keyBindConfig.resetProfitTrackerKeybind)));
                     default -> PlaceholderHandler.noResult();
                 };
             }
@@ -54,6 +55,11 @@ public class KeyBindHandler extends Handler {
                 && KeyBindHelper.isPressed(Configs.keyBindConfig.openMainKeybind)
         ) {
             minecraft.setScreen(new MainScreen(minecraft.screen));
+        }
+
+        if (minecraft.screen == null
+                && KeyBindHelper.isPressed(Configs.keyBindConfig.resetProfitTrackerKeybind)) {
+            ProfitTrackerHandler.instance().resetSession();
         }
 
         switch (Configs.keyBindConfig.inspectMode.get()) {
@@ -72,7 +78,8 @@ public class KeyBindHandler extends Handler {
     protected Map<String, Pair<MutableComponent, MutableComponent>> _getFields() {
         return Map.of(
                 "openMainKeybind", Pair.of(Component.literal(KeyBindHelper.getKeyString(Configs.keyBindConfig.openMainKeybind)), Component.empty()),
-                "inspectKeybind", Pair.of(Component.literal(KeyBindHelper.getKeyString(Configs.keyBindConfig.inspectKeybind)), Component.empty())
+                "inspectKeybind", Pair.of(Component.literal(KeyBindHelper.getKeyString(Configs.keyBindConfig.inspectKeybind)), Component.empty()),
+                "resetProfitTrackerKeybind", Pair.of(Component.literal(KeyBindHelper.getKeyString(Configs.keyBindConfig.resetProfitTrackerKeybind)), Component.empty())
         );
     }
     //endregion

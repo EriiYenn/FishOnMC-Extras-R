@@ -69,6 +69,7 @@ public class HudRenderHandler extends Handler {
             elements.add(Pair.of("location_hud", new LocationElement()));
             elements.add(Pair.of("hotbar_hud", new HotbarElement()));
             elements.add(Pair.of("pet_hud", new PetElement()));
+            elements.add(Pair.of("profit_tracker_hud", new ProfitTrackerElement()));
             elements.add(Pair.of("notifier_hud", new NotifierElement()));
             elements.add(Pair.of("debug_field_hud", new _DebugField()));
         }

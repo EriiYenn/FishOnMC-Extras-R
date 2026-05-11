@@ -5,6 +5,7 @@ import dannypx.foe.handler.fetch.BossEventHandler;
 import dannypx.foe.handler.io.DataFileHandler;
 import dannypx.foe.handler.io.DataModels;
 import dannypx.foe.handler.logic.LoggerHandler;
+import dannypx.foe.handler.logic.ProfitRewardAttributionHandler;
 import dannypx.foe.handler.fetch.QuestScreenHandler;
 import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.helper.ComponentHelper;
@@ -104,12 +105,20 @@ public class QuestDataHandler extends Handler {
     }
 
     public void setFish(FishTagObject fishNbtObject) {
-        questData.questList.getOrDefault(BossEventHandler.instance().getLocation().getString(), new ArrayList<>()).forEach(quest -> {
+        boolean completedQuest = false;
+        for (Quest quest : questData.questList.getOrDefault(BossEventHandler.instance().getLocation().getString(), new ArrayList<>())) {
             if(Objects.equals(quest.goal, fishNbtObject.getFishSize()) || Objects.equals(quest.goal, fishNbtObject.getRarity())) {
+                int previous = quest.current;
                 quest.addCurrent();
                 this.needsUpdate = true;
+                if (previous < quest.max && quest.current == quest.max) {
+                    completedQuest = true;
+                }
             }
-        });
+        }
+        if (completedQuest) {
+            ProfitRewardAttributionHandler.instance().openQuestContext();
+        }
         QuestScreenHandler.instance().checkForCompletedQuests();
     }
     //endregion
