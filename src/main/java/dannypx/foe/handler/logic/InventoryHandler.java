@@ -200,7 +200,7 @@ public class InventoryHandler extends Handler {
                                         }
                                         yield PlaceholderHandler.noResult();
                                     }
-                                    default -> PlaceholderHandler.getNbtValue(heldItem, params[2]);
+                                    default -> PlaceholderHandler.getNbtValue(heldItem, params[1]);
                                 };
                             }
                         }
