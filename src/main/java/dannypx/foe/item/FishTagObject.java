@@ -1,5 +1,6 @@
 package dannypx.foe.item;
 
+import dannypx.foe.helper.ComponentHelper;
 import dannypx.foe.helper.ItemStackHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,7 +60,8 @@ public class FishTagObject extends TagObject {
         ) {
             try {
                 List<Component> componentList = this.getLore();
-                return componentList.get(VARIANT_LINE).getSiblings().get(VARIANT_SIBLING);
+                Component variant = componentList.get(VARIANT_LINE).getSiblings().get(VARIANT_SIBLING);
+                return ComponentHelper.trim(variant);
             } catch (ArrayIndexOutOfBoundsException e) {
                 return Component.empty();
             }
@@ -77,7 +79,8 @@ public class FishTagObject extends TagObject {
         ) {
             try {
                 List<Component> componentList = this.getLore();
-                return componentList.get(FISH_SIZE_LINE).getSiblings().get(FISH_SIZE_SIBLING);
+                Component fishSize = componentList.get(FISH_SIZE_LINE).getSiblings().get(FISH_SIZE_SIBLING);;
+                return ComponentHelper.trim(fishSize);
             } catch (ArrayIndexOutOfBoundsException e) {
                 return Component.empty();
             }

@@ -2,6 +2,7 @@ package dannypx.foe.handler.logic;
 
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.fetch.ChatHandler;
+import dannypx.foe.handler.store.CustomTrackerDataHandler;
 import dannypx.foe.type.placeholder.PlaceholderValue;
 import dannypx.foe.type.placeholder.StringValue;
 import dannypx.foe.type.tuple.Pair;
@@ -35,26 +36,26 @@ public class TimerHandler extends Handler {
         if(params.length > 1) {
             Pattern fieldPattern = Pattern.compile("^(timer|offset|notification_to_trigger|clean_up_chat_trigger|use_timer|is_period|off_timer|notification_to_trigger_end|time)$");
 
-            CustomTimerDataHandler.CustomTimer timer = timers.stream().filter(t -> Objects.equals(t.name, params[0])).findFirst().orElse(null);
+            CustomTimerDataHandler.CustomTimer timer = timers.stream().filter(t -> Objects.equals(t.getName(), params[0])).findFirst().orElse(null);
 
             if(timer != null) {
                 if(fieldPattern.matcher(params[1]).matches()) {
                     return switch (params[1]) {
-                        case "timer" -> PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timer.timer)));
-                        case "offset" -> PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timer.offset)));
-                        case "notification_to_trigger" -> PlaceholderHandler.getPlaceholderValue(new StringValue(timer.notificationToTrigger));
-                        case "clean_up_chat_trigger" -> PlaceholderHandler.getPlaceholderValue(new StringValue(timer.cleanUpChatTrigger));
-                        case "use_timer" -> PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timer.useTimer)));
-                        case "is_period" -> PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timer.isPeriod)));
+                        case "timer" -> PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timer.getTimer())));
+                        case "offset" -> PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timer.getOffset())));
+                        case "notification_to_trigger" -> PlaceholderHandler.getPlaceholderValue(new StringValue(timer.getNotificationToTrigger()));
+                        case "clean_up_chat_trigger" -> PlaceholderHandler.getPlaceholderValue(new StringValue(timer.getCleanUpChatTrigger()));
+                        case "use_timer" -> PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timer.isUseTimer())));
+                        case "is_period" -> PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timer.isPeriod())));
                         case "off_timer" -> {
                             if(timer instanceof CustomTimerDataHandler.CustomTimerPeriod timerPeriod) {
-                                yield PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timerPeriod.offTimer)));
+                                yield PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timerPeriod.getOffTimer())));
                             }
                             yield PlaceholderHandler.noResult();
                         }
                         case "notification_to_trigger_end" -> {
                             if(timer instanceof CustomTimerDataHandler.CustomTimerPeriod timerPeriod) {
-                                yield PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timerPeriod.notificationToTriggerEnd)));
+                                yield PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(timerPeriod.getNotificationToTriggerEnd())));
                             }
                             yield PlaceholderHandler.noResult();
                         }
@@ -62,8 +63,8 @@ public class TimerHandler extends Handler {
                             if(timer instanceof CustomTimerDataHandler.CustomTimerPeriod timerPeriod
                                 && params.length >= 3
                             ) {
-                                long cycle = timerPeriod.timer + timerPeriod.offTimer;
-                                long adjusted = System.currentTimeMillis() / 1000 + timerPeriod.offset;
+                                long cycle = timerPeriod.getTimer() + timerPeriod.getOffTimer();
+                                long adjusted = System.currentTimeMillis() / 1000 + timerPeriod.getOffset();
                                 long pos = adjusted % cycle;
 
                                 long secondsUntilNextOn;
@@ -72,14 +73,14 @@ public class TimerHandler extends Handler {
                                 Triplet<Long, Long, Long> remainingTimeOff;
                                 boolean isOn;
 
-                                if(pos < timerPeriod.timer) {
-                                    secondsUntilNextOn = timerPeriod.timer - pos;
+                                if(pos < timerPeriod.getTimer()) {
+                                    secondsUntilNextOn = timerPeriod.getTimer() - pos;
                                     secondsUntilNextOff = cycle - pos;
                                     remainingTimeOn = getTime(secondsUntilNextOn);
                                     remainingTimeOff = getTime(secondsUntilNextOff);
                                     isOn = true;
                                 } else {
-                                    secondsUntilNextOn = (cycle - pos) + timerPeriod.timer;
+                                    secondsUntilNextOn = (cycle - pos) + timerPeriod.getTimer();
                                     secondsUntilNextOff = cycle - pos;
                                     remainingTimeOn = getTime(secondsUntilNextOn);
                                     remainingTimeOff = getTime(secondsUntilNextOff);
@@ -105,9 +106,9 @@ public class TimerHandler extends Handler {
                                 };
                             } else if (params.length == 3) {
                                 long timeSeconds = System.currentTimeMillis() / 1000;
-                                long adjusted = timeSeconds + timer.offset;
-                                long pos = adjusted % timer.timer;
-                                long remaining = timer.timer - pos;
+                                long adjusted = timeSeconds + timer.getOffset();
+                                long pos = adjusted % timer.getTimer();
+                                long remaining = timer.getTimer() - pos;
 
                                 Triplet<Long, Long, Long> remainingTime = getTime(remaining);
 
@@ -140,42 +141,42 @@ public class TimerHandler extends Handler {
 
     //region Methods
     public void tick() {
-        long timeSeconds = System.currentTimeMillis() / 1000;
+        long timeMillis = System.currentTimeMillis();
 
         timers.forEach(timer -> {
-            long adjustedWithOffset = timeSeconds + timer.offset;
+            long adjustedWithOffset = timeMillis + timer.getOffset() * 1000L;
 
             if(timer instanceof CustomTimerDataHandler.CustomTimerPeriod timerPeriod) {
-                long cycle = timerPeriod.timer + timerPeriod.offTimer;
+                long cycle = timerPeriod.getTimer() * 1000L + timerPeriod.getOffTimer() * 1000L;
                 if(cycle > 0) {
                     long pos = adjustedWithOffset % cycle;
                     long prevPos = lastPos.getOrDefault(timerPeriod, pos);
 
                     if (crossed(prevPos, pos, 0)) {
-                        this.triggerTimer(timerPeriod, timeSeconds, endOfOffCallbacks.get(timerPeriod));
+                        this.triggerTimer(timerPeriod, timeMillis, endOfOffCallbacks.get(timerPeriod));
                     }
 
-                    if (crossed(prevPos, pos, timerPeriod.timer)) {
-                        this.triggerTimer(timerPeriod, timeSeconds, endOfOnCallbacks.get(timerPeriod));
+                    if (crossed(prevPos, pos, timerPeriod.getTimer() * 1000L)) {
+                        this.triggerTimer(timerPeriod, timeMillis, endOfOnCallbacks.get(timerPeriod));
 
                         // Clean Chat Trigger
-                        String[] chatTriggers = timer.cleanUpChatTrigger.trim().split("\\s*,\\s*");
+                        String[] chatTriggers = timer.getCleanUpChatTrigger().replaceAll("\\s", "").split("\\s*,\\s*");
                         ChatHandler.instance().cleanChatTriggerStore(chatTriggers);
                     }
 
                     lastPos.put(timerPeriod, pos);
                 }
             } else {
-                if(timer.timer > 0) {
-                    long interval = timer.timer;
+                if(timer.getTimer() > 0) {
+                    long interval = timer.getTimer() * 1000L;
                     long pos = adjustedWithOffset % interval;
                     long prevPos = lastPos.getOrDefault(timer, pos);
 
                     if (crossed(prevPos, pos, 0)) {
-                        this.triggerTimer(timer, timeSeconds, callbacks.get(timer));
+                        this.triggerTimer(timer, timeMillis, callbacks.get(timer));
 
                         // Clean Chat Trigger
-                        String[] chatTriggers = timer.cleanUpChatTrigger.trim().split("\\s*,\\s*");
+                        String[] chatTriggers = timer.getCleanUpChatTrigger().replaceAll("\\s", "").split("\\s*,\\s*");
                         ChatHandler.instance().cleanChatTriggerStore(chatTriggers);
                     }
 
@@ -199,17 +200,21 @@ public class TimerHandler extends Handler {
 
         List<CustomTimerDataHandler.CustomTimer> tempTimers = new ArrayList<>();
         CustomTimerDataHandler.instance().getCustomTimerData().timerList.forEach((name, timer) -> {
-            if(timer.useTimer) {
+            if(timer.isUseTimer()) {
                 if(timer instanceof CustomTimerDataHandler.CustomTimerPeriod timerPeriod) {
                     tempTimers.add(timerPeriod);
 
                     this.register(timerPeriod, () -> {
                         CodeExecuterHandler.runLater(1, () -> {
-                            NotifierHandler.instance().notifyChatTrigger(timerPeriod.notificationToTrigger);
+                            NotifierHandler.instance().notifyOnTrigger(timerPeriod.getNotificationToTrigger());
+                            ChatNotifierHandler.instance().notifyChatOnTrigger(timerPeriod.getChatNotificationToTrigger());
+                            CustomTrackerDataHandler.instance().updateTracker(timerPeriod.getTrackerToTrigger());
                         });
                     }, () -> {
                         CodeExecuterHandler.runLater(1, () -> {
-                            NotifierHandler.instance().notifyChatTrigger(timerPeriod.notificationToTriggerEnd);
+                            NotifierHandler.instance().notifyOnTrigger(timerPeriod.getNotificationToTriggerEnd());
+                            ChatNotifierHandler.instance().notifyChatOnTrigger(timerPeriod.getChatNotificationToTriggerEnd());
+                            CustomTrackerDataHandler.instance().updateTracker(timerPeriod.getTrackerToTriggerEnd());
                         });
                     });
                 } else {
@@ -217,7 +222,9 @@ public class TimerHandler extends Handler {
 
                     this.register(timer, () -> {
                         CodeExecuterHandler.runLater(1, () -> {
-                            NotifierHandler.instance().notifyChatTrigger(timer.notificationToTrigger);
+                            NotifierHandler.instance().notifyOnTrigger(timer.getNotificationToTrigger());
+                            ChatNotifierHandler.instance().notifyChatOnTrigger(timer.getChatNotificationToTrigger());
+                            CustomTrackerDataHandler.instance().updateTracker(timer.getTrackerToTrigger());
                         });
                     });
                 }
@@ -244,10 +251,11 @@ public class TimerHandler extends Handler {
                 lastTrigger.put(timer, time);
                 callback.run();
             }
-        };
+        }
     }
 
     private boolean crossed(long prev, long curr, long target) {
+        if (curr == prev) return false;
         if(prev <= curr) {
             return prev < target && curr >= target;
         } else {

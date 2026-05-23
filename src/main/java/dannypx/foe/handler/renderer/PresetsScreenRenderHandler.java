@@ -1,6 +1,7 @@
 package dannypx.foe.handler.renderer;
 
 import dannypx.foe.handler.ScreenHandler;
+import dannypx.foe.handler.logic.SearchHandler;
 import dannypx.foe.type.tuple.Pair;
 import java.util.Map;
 import net.minecraft.client.gui.screens.Screen;
@@ -21,23 +22,11 @@ public class PresetsScreenRenderHandler extends ScreenHandler {
     }
 
     //region Fields
-
-    private boolean isOnScreen = false;
-
-    public void setOnScreen(boolean onScreen) {
-        isOnScreen = onScreen;
-    }
     //endregion
 
     //region Methods
-    public void init(Screen screen) {
-        this.setOnScreen(true);
-    }
-
-    public void checkMouseScroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if(isOnScreen
-                && screen instanceof ContainerScreen containerScreen
-        ) {
+    public boolean checkMouseScroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount, boolean consumed) {
+        if(screen instanceof ContainerScreen containerScreen) {
             int syncId = containerScreen.getMenu().containerId;
             int moveSlot = -1;
 
@@ -58,6 +47,8 @@ public class PresetsScreenRenderHandler extends ScreenHandler {
                 );
             }
         }
+
+        return false;
     }
     //endregion
 

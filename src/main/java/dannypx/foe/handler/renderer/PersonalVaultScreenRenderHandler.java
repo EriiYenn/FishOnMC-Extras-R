@@ -2,6 +2,7 @@ package dannypx.foe.handler.renderer;
 
 import dannypx.foe.handler.ScreenHandler;
 import dannypx.foe.handler.logic.LoadingHandler;
+import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.handler.logic.SearchHandler;
 import dannypx.foe.screens.widget.SearchBarWidget;
 import dannypx.foe.type.tuple.Pair;
@@ -30,19 +31,13 @@ public class PersonalVaultScreenRenderHandler extends ScreenHandler {
     }
 
     //region Fields
-    private boolean isOnScreen = false;
-
-    public void setOnScreen(boolean onScreen) {
-        isOnScreen = onScreen;
-    }
-
     SearchBarWidget searchBarWidget;
     //endregion
 
     //region Methods
     public void init(Screen screen) {
+        SearchHandler.instance().setFocused(false);
         SearchHandler.instance().setOnScreen(true);
-        this.setOnScreen(true);
         this.initWidgets(screen);
     }
 
@@ -72,10 +67,8 @@ public class PersonalVaultScreenRenderHandler extends ScreenHandler {
         searchBarWidget.render(guiGraphics, tickDelta);
     }
 
-    public void checkMouseScroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if(isOnScreen
-                && screen instanceof ContainerScreen containerScreen
-        ) {
+    public boolean checkMouseScroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount, boolean consumed) {
+        if(screen instanceof ContainerScreen containerScreen) {
             int syncId = containerScreen.getMenu().containerId;
             int moveSlot = -1;
 
@@ -96,6 +89,11 @@ public class PersonalVaultScreenRenderHandler extends ScreenHandler {
                 );
             }
         }
+        return false;
+    }
+
+    public void onClose(Screen screen) {
+        SearchHandler.instance().setOnScreen(false);
     }
     //endregion
 

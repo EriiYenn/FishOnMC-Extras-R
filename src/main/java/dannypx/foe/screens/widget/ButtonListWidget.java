@@ -1,7 +1,6 @@
 package dannypx.foe.screens.widget;
 
 import dannypx.foe.mixin.accessor.AbstractSelectionListAccessor;
-import dannypx.foe.mixin.accessor.AbstractSelectionListEntryAccessor;
 import dannypx.foe.screens.interfaces.ScreenConstants;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,6 +55,7 @@ public class ButtonListWidget extends AbstractSelectionList<ButtonListWidget.@No
         );
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public int addEntry(ButtonEntry entry) {
         entry.setX(this.getRowLeft());
@@ -68,6 +68,7 @@ public class ButtonListWidget extends AbstractSelectionList<ButtonListWidget.@No
         return this.children().size() - 1;
     }
 
+    @SuppressWarnings("unchecked")
     public int addEntryAtPos(ButtonEntry entry, int pos) {
         entry.setX(this.getRowLeft());
         entry.setWidth(this.getRowWidth());

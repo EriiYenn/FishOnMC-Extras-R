@@ -110,11 +110,11 @@ public class NotifierHandler extends Handler {
         List<Component> notificationComponentList = new ArrayList<>(Arrays.asList(
                 tagComponent,
                 fish.getName(),
-                ComponentHelper.concat(fish.getFishSizeComponent(), lengthComponent, weightComponent),
+                ComponentHelper.concat(fish.getFishSizeComponent(), Component.literal(" "), lengthComponent, weightComponent),
                 Component.empty(),
                 Component.literal(" - Drystreaks before catch").withStyle(ChatFormatting.GRAY),
-                ComponentHelper.concat(rarityComponent, ComponentHelper.literal(rarityDrystreak.value2())),
-                ComponentHelper.concat(sizeComponent, ComponentHelper.literal(sizeDryStreak.value2()))
+                ComponentHelper.concat(rarityComponent, Component.literal(" "), ComponentHelper.literal(rarityDrystreak.value2())),
+                ComponentHelper.concat(sizeComponent, Component.literal(" "), ComponentHelper.literal(sizeDryStreak.value2()))
         ));
 
         if(!Objects.equals(fish.getVariant(), "normal")) {
@@ -356,17 +356,17 @@ public class NotifierHandler extends Handler {
         );
     }
 
-    public void notifyChatTrigger(String notificationId) {
+    public void notifyOnTrigger(String notificationId) {
         CustomNotificationDataHandler.CustomNotification notification = CustomNotificationDataHandler.instance().getCustomNotificationData().notificationList.getOrDefault(notificationId, null);
 
         if(notification != null && minecraft.player != null) {
             ItemStack itemStack = ItemStack.EMPTY;
 
-            if(!notification.icon.isBlank()) {
+            if(!notification.getIcon().isBlank()) {
                 HolderLookup.Provider lookup = minecraft.player.registryAccess();
 
                 ItemParser itemParser = new ItemParser(lookup);
-                StringReader stringReader = new StringReader(notification.icon);
+                StringReader stringReader = new StringReader(notification.getIcon());
                 try {
                     ItemParser.ItemResult result = itemParser.parse(stringReader);
 
@@ -377,10 +377,10 @@ public class NotifierHandler extends Handler {
                 }
             }
 
-            List<MutableComponent> lines = notification.stringLines.stream().map(string -> string.replace("&", "§")).map(PlaceholderHandler::parsePlaceholderFromString).filter(Pair::value1).map(Pair::value2).toList();
+            List<MutableComponent> lines = notification.getStringLines().stream().map(string -> string.replace("&", "§")).map(PlaceholderHandler::parsePlaceholderFromString).filter(Pair::value1).map(Pair::value2).toList();
             List<Component> newLines = new ArrayList<>();
 
-            lines.forEach(line -> newLines.addAll(ComponentHelper.wrapStyledComponent(line, notification.icon.isBlank() ? CONTENT_WIDTH : ICON_CONTENT_WIDTH, true, minecraft.font)));
+            lines.forEach(line -> newLines.addAll(ComponentHelper.wrapStyledComponent(line, notification.getIcon().isBlank() ? CONTENT_WIDTH : ICON_CONTENT_WIDTH, true, minecraft.font)));
 
             if(itemStack == ItemStack.EMPTY) {
                 this.addNotification(

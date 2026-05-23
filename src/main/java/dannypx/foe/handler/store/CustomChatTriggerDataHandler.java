@@ -49,6 +49,7 @@ public class CustomChatTriggerDataHandler extends Handler {
             this.updateCustomChatTriggerData();
         } else if(!CustomChatTriggerDataModel.CUSTOM_CHAT_TRIGGER_DATA_MODEL_VERSION.equals(customChatTriggerData.version)) {
             customChatTriggerData.version = CustomChatTriggerDataModel.CUSTOM_CHAT_TRIGGER_DATA_MODEL_VERSION;
+            this.updateDefault();
             needsUpdate = true;
         }
     }
@@ -76,7 +77,14 @@ public class CustomChatTriggerDataHandler extends Handler {
         return customChatTriggerData.chatTriggerList.remove(id);
     }
 
-    public void updateChatTrigger(String currentSelectedChatTrigger, String newName, String regex, String notificationToTrigger, boolean useChatTrigger) {
+    public void updateChatTrigger(String currentSelectedChatTrigger,
+                                  String newName,
+                                  String regex,
+                                  String notificationToTrigger,
+                                  String chatNotificationToTrigger,
+                                  String trackerToTrigger,
+                                  boolean useChatTrigger
+    ) {
         CustomChatTrigger newChatTrigger = customChatTriggerData.chatTriggerList.get(currentSelectedChatTrigger);
 
         if(!Objects.equals(currentSelectedChatTrigger, newName)) {
@@ -88,9 +96,22 @@ public class CustomChatTriggerDataHandler extends Handler {
         newChatTrigger.regex = regex;
         newChatTrigger.pattern = Pattern.compile(regex);
         newChatTrigger.notificationToTrigger = notificationToTrigger;
+        newChatTrigger.chatNotificationToTrigger = chatNotificationToTrigger;
+        newChatTrigger.trackerToTrigger = trackerToTrigger;
         newChatTrigger.useChatTrigger = useChatTrigger;
 
         customChatTriggerData.chatTriggerList.put(currentSelectedChatTrigger, newChatTrigger);
+        needsUpdate = true;
+    }
+
+    public void updateDefault() {
+        CustomChatTriggerDataModel.defaultChatTriggers.forEach((key, timer) -> {
+            customChatTriggerData.chatTriggerList.putIfAbsent(key, timer);
+        });
+    }
+
+    public void fixDefault() {
+        customChatTriggerData.chatTriggerList.putAll(CustomChatTriggerDataModel.defaultChatTriggers);
         needsUpdate = true;
     }
 
@@ -103,51 +124,89 @@ public class CustomChatTriggerDataHandler extends Handler {
 
     //region Model
     public static class CustomChatTriggerDataModel extends DataModels.DataModel {
-        private static final String CUSTOM_CHAT_TRIGGER_DATA_MODEL_VERSION = "0.1";
+        private static final String CUSTOM_CHAT_TRIGGER_DATA_MODEL_VERSION = "0.3";
 
-        private static final Map<String, CustomChatTrigger> defaultChatTriggers = Map.of(
-                "Contest Type", new CustomChatTrigger(
+        private static final Map<String, CustomChatTrigger> defaultChatTriggers = Map.ofEntries(
+                Map.entry("Contest Type", new CustomChatTrigger(
                         "Contest Type",
                         "^Type:.*",
                         "",
+                        "",
+                        "",
                         true
-                ),
-                "Contest Location", new CustomChatTrigger(
+                )),
+                Map.entry("Contest Location", new CustomChatTrigger(
                         "Contest Location",
                         "^Location:.*",
                         "",
+                        "",
+                        "",
                         true
-                ),
-                "Contest Level", new CustomChatTrigger(
+                )),
+                Map.entry("Contest Level", new CustomChatTrigger(
                         "Contest Level",
                         "^Level:.*",
                         "",
+                        "",
+                        "",
                         true
-                ),
-                "Contest 1st", new CustomChatTrigger(
+                )),
+                Map.entry("Contest 1st", new CustomChatTrigger(
                         "Contest 1st",
                         "^\uF060.*",
                         "",
+                        "",
+                        "",
                         true
-                ),
-                "Contest 2nd", new CustomChatTrigger(
+                )),
+                Map.entry("Contest 2nd", new CustomChatTrigger(
                         "Contest 2nd",
                         "^\uF061.*",
                         "",
+                        "",
+                        "",
                         true
-                ),
-                "Contest 3rd", new CustomChatTrigger(
+                )),
+                Map.entry("Contest 3rd", new CustomChatTrigger(
                         "Contest 3rd",
                         "^\uF062.*",
                         "",
+                        "",
+                        "",
                         true
-                ),
-                "Contest Placement", new CustomChatTrigger(
+                )),
+                Map.entry("Contest Placement", new CustomChatTrigger(
                         "Contest Placement",
                         "^You →.*",
                         "",
+                        "",
+                        "",
                         true
-                )
+                )),
+                Map.entry("Fabled Start Chat", new CustomChatTrigger(
+                        "Fabled Start Chat",
+                        "^Visit the (.+) to$",
+                        "",
+                        "",
+                        "FabledEvent.SetTrue",
+                        true
+                )),
+                Map.entry("Fabled Start events", new CustomChatTrigger(
+                        "Fabled Start events",
+                        "^FABLED » A Fabled Event is active at (.+)$",
+                        "",
+                        "",
+                        "FabledEvent.SetTrue",
+                        true
+                )),
+                Map.entry("Fabled End Chat", new CustomChatTrigger(
+                        "Fabled End Chat",
+                        "^Caught by (.+)$",
+                        "",
+                        "",
+                        "FabledEvent.SetFalse",
+                        true
+                ))
         );
 
         //Name Chat Trigger, Chat Trigger
@@ -161,17 +220,59 @@ public class CustomChatTriggerDataHandler extends Handler {
 
     //region Notification Object
     public static class CustomChatTrigger {
-        public String name;
-        public String regex;
-        public Pattern pattern;
-        public String notificationToTrigger;
-        public boolean useChatTrigger;
+        private String name;
+        private String regex;
+        private Pattern pattern;
+        private String notificationToTrigger;
+        private String chatNotificationToTrigger;
+        private String trackerToTrigger;
+        private boolean useChatTrigger;
 
-        public CustomChatTrigger(String name, String regex, String notificationToTrigger, boolean useChatTrigger) {
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getRegex() {
+            return regex != null ? regex : "";
+        }
+
+        public Pattern getPattern() {
+            return pattern != null ? pattern : Pattern.compile("");
+        }
+
+        public String getNotificationToTrigger() {
+            return notificationToTrigger != null ? notificationToTrigger : "";
+        }
+
+        public String getChatNotificationToTrigger() {
+            return chatNotificationToTrigger != null ? chatNotificationToTrigger : "";
+        }
+
+        public String getTrackerToTrigger() {
+            return trackerToTrigger != null ? trackerToTrigger : "";
+        }
+
+        public boolean isUseChatTrigger() {
+            return useChatTrigger;
+        }
+
+        public CustomChatTrigger(String name,
+                                 String regex,
+                                 String notificationToTrigger,
+                                 String chatNotificationToTrigger,
+                                 String trackerToTrigger,
+                                 boolean useChatTrigger
+        ) {
             this.name = name;
             this.regex = regex;
             this.pattern = Pattern.compile(regex);
             this.notificationToTrigger = notificationToTrigger;
+            this.chatNotificationToTrigger = chatNotificationToTrigger;
+            this.trackerToTrigger = trackerToTrigger;
             this.useChatTrigger = useChatTrigger;
         }
 
@@ -180,6 +281,8 @@ public class CustomChatTriggerDataHandler extends Handler {
             this.regex = "";
             this.pattern = Pattern.compile("");
             this.notificationToTrigger = "";
+            this.chatNotificationToTrigger = "";
+            this.trackerToTrigger = "";
             this.useChatTrigger = true;
         }
     }

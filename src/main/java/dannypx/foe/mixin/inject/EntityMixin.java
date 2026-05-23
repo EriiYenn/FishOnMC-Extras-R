@@ -2,6 +2,7 @@ package dannypx.foe.mixin.inject;
 
 import dannypx.foe.config.Configs;
 import dannypx.foe.handler.logic.ConnectionHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -21,11 +22,15 @@ public abstract class EntityMixin<T extends Entity, S extends EntityRenderState>
         if(ConnectionHandler.instance().isOnServer()
                 && Configs.mainConfig.enableMod.get()
                 && Configs.mixinConfig.entityMixinIsCustomNameVisible.get()
-                && !Configs.rendererConfig.showPetName.get()
-                && this.getName().getString().contains("'s")
-                && this.getName().getString().contains("Pet")
         ) {
-            cir.setReturnValue(false);
+            if(!Configs.rendererConfig.showPetName.get()
+                    && this.getName().getString().contains("'s")
+                    && this.getName().getString().contains("Pet")
+            ) {
+                cir.setReturnValue(false);
+            } else if (Minecraft.getInstance().options.hideGui) {
+                cir.setReturnValue(false);
+            }
         }
     }
 }

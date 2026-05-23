@@ -1,6 +1,7 @@
 package dannypx.foe.item;
 
 import com.mojang.serialization.DataResult;
+import dannypx.foe.helper.ComponentHelper;
 import dannypx.foe.helper.ItemStackHelper;
 import dannypx.foe.helper.UUIDHelper;
 import dannypx.foe.type.tuple.Pair;
@@ -145,7 +146,8 @@ public class TagObject {
         ) {
             try {
                 List<Component> componentList = this.getLore();
-                return componentList.get(RARITY_LINE).getSiblings().get(RARITY_SIBLING);
+                Component rating = componentList.get(RARITY_LINE).getSiblings().get(RARITY_SIBLING);
+                return ComponentHelper.trim(rating);
             } catch (ArrayIndexOutOfBoundsException e) {
                 return Component.empty();
             }

@@ -282,7 +282,7 @@ public class ComponentHelper {
     }
 
     public static int toIntFromString(String value) {
-        value = value.trim();
+        value = value.trim().replace(",", "");
         if(value.contains("K")) {
             return (int) (Float.parseFloat(value.substring(0, value.indexOf("K"))) * 1000f);
         } else if(value.contains("M")) {
@@ -317,7 +317,7 @@ public class ComponentHelper {
     }
 
     public static String convertField(String s) {
-        return splitTitleCase(capitalize(s));
+        return splitTitleCase(capitalize(s).replace("_", " "));
     }
 
     public static int getWidth(Font font, Component component, boolean isSmall) {
@@ -492,6 +492,27 @@ public class ComponentHelper {
         }, Style.EMPTY);
 
         return result;
+    }
+
+    public static Component trim(Component component) {
+        String full = component.getString();
+        int length = full.length();
+
+        int start = 0;
+        while (start < length && Character.isWhitespace(full.charAt(start))) {
+            start++;
+        }
+
+        int end = length;
+        while (end > start && Character.isWhitespace(full.charAt(end - 1))) {
+            end--;
+        }
+
+        if (start >= end) {
+            return Component.empty();
+        }
+
+        return substring(component, start, end);
     }
 
     public static byte[] compress(final String str) throws IOException {

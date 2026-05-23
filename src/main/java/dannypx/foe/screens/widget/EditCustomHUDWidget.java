@@ -130,23 +130,23 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
         removeAllEntries();
         hasSelectedOption = true;
         newName = id;
-        scale = customHud.scale;
+        scale = customHud.getScale();
         currentSelectedHud = id;
         header = Component.literal(id);
         idEditBox.setValue(id);
         idEditBox.setHint(Component.literal(id));
-        scaleEditBox.setValue(String.format(Locale.US, "%f", customHud.scale));
-        scaleEditBox.setHint(Component.literal(String.format(Locale.US, "%f", customHud.scale)));
-        showBackground = customHud.showBackground;
-        if(customHud.showBackground != showBackgroundCheckBox.selected()) {
+        scaleEditBox.setValue(String.format(Locale.US, "%f", customHud.getScale()));
+        scaleEditBox.setHint(Component.literal(String.format(Locale.US, "%f", customHud.getScale())));
+        showBackground = customHud.isShowBackground();
+        if(customHud.isShowBackground() != showBackgroundCheckBox.selected()) {
             showBackgroundCheckBox.onPress(null);
         }
-        showElement = customHud.showElement;
-        if(customHud.showElement != showElementCheckBox.selected()) {
+        showElement = customHud.isShowElement();
+        if(customHud.isShowElement() != showElementCheckBox.selected()) {
             showElementCheckBox.onPress(null);
         }
 
-        customHud.stringLines.forEach(line -> this.addEntry(new LineEntry(
+        customHud.getStringLines().forEach(line -> this.addEntry(new LineEntry(
                 line.value1(),
                 line.value2(),
                 line.value3(),

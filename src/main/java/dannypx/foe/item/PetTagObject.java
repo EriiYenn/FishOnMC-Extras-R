@@ -1,5 +1,6 @@
 package dannypx.foe.item;
 
+import dannypx.foe.helper.ComponentHelper;
 import dannypx.foe.helper.ItemStackHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,7 +58,8 @@ public class PetTagObject extends TagObject {
         ) {
             try {
                 List<Component> componentList = this.getLore();
-                return componentList.get(RATING_LINE).getSiblings().get(RATING_SIBLING);
+                Component rating = componentList.get(RATING_LINE).getSiblings().get(RATING_SIBLING);
+                return ComponentHelper.trim(rating);
             } catch (ArrayIndexOutOfBoundsException e) {
                 return Component.empty();
             }

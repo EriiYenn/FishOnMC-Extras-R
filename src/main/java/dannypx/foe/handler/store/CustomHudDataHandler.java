@@ -54,6 +54,7 @@ public class CustomHudDataHandler extends Handler {
             this.updateCustomHudData();
         } else if(!CustomHudDataModel.CUSTOM_HUD_DATA_MODEL_VERSION.equals(customHudData.version)) {
             customHudData.version = CustomHudDataModel.CUSTOM_HUD_DATA_MODEL_VERSION;
+            this.updateDefault();
             needsUpdate = true;
         }
     }
@@ -109,6 +110,17 @@ public class CustomHudDataHandler extends Handler {
         newHud.alignment = alignment;
 
         customHudData.customHudRawDataList.put(currentSelectedHud, newHud);
+        needsUpdate = true;
+    }
+
+    public void updateDefault() {
+        CustomHudDataModel.defaultHuds.forEach((key, timer) -> {
+            customHudData.customHudRawDataList.putIfAbsent(key, timer);
+        });
+    }
+
+    public void fixDefault() {
+        customHudData.customHudRawDataList.putAll(CustomHudDataModel.defaultHuds);
         needsUpdate = true;
     }
 
@@ -182,13 +194,41 @@ public class CustomHudDataHandler extends Handler {
     //region Hud Object
     public static class CustomHud {
         // String, isCentre, isSmall
-        public List<Triplet<String, Boolean, Boolean>> stringLines;
-        public Alignment alignment;
-        public int xPos;
-        public int yPos;
-        public float scale;
-        public boolean showBackground;
-        public boolean showElement;
+        private List<Triplet<String, Boolean, Boolean>> stringLines;
+        private Alignment alignment;
+        private int xPos;
+        private int yPos;
+        private float scale;
+        private boolean showBackground;
+        private boolean showElement;
+
+        public List<Triplet<String, Boolean, Boolean>> getStringLines() {
+            return stringLines != null ? stringLines : new ArrayList<>();
+        }
+
+        public Alignment getAlignment() {
+            return alignment != null ? alignment : Alignment.TOP_LEFT;
+        }
+
+        public int getxPos() {
+            return xPos;
+        }
+
+        public int getyPos() {
+            return yPos;
+        }
+
+        public float getScale() {
+            return scale;
+        }
+
+        public boolean isShowBackground() {
+            return showBackground;
+        }
+
+        public boolean isShowElement() {
+            return showElement;
+        }
 
         public CustomHud(
                 List<Triplet<String, Boolean, Boolean>> stringLines,

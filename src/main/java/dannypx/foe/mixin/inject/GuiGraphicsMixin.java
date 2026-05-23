@@ -25,11 +25,15 @@ public abstract class GuiGraphicsMixin {
     private void renderItemCountInject(Font font, ItemStack stack, int x, int y, String stackCountText, CallbackInfo ci) {
         if(ConnectionHandler.instance().isOnServer()
                 && Configs.mainConfig.enableMod.get()
-                && Configs.rendererConfig.useSmallStackCountNumber.get()
                 && Configs.mixinConfig.guiGraphicsMixinRenderItemCount.get()
         ) {
-            ItemRendererHandler.instance().drawStackCount((GuiGraphics) (Object) this, font, stack, x, y);
-            ci.cancel();
+            if(Configs.rendererConfig.useSmallStackCountNumber.get()) {
+                ItemRendererHandler.instance().drawStackCount((GuiGraphics) (Object) this, font, stack, x, y);
+                ci.cancel();
+            } else {
+                ItemRendererHandler.instance().drawStackCount((GuiGraphics) (Object) this, font, stack, x, y, false);
+                ci.cancel();
+            }
         }
     }
 

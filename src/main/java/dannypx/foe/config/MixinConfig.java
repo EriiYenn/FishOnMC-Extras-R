@@ -150,6 +150,12 @@ public class MixinConfig extends Config {
     @ConfigGroup.Pop
     public ValidatedBoolean entityMixinIsCustomNameVisible = new ValidatedBoolean(true);
 
+    @Name("EntityRenderDispatcher Mixin")
+    public ConfigGroup entityRenderDispatcherMixinGroup = new ConfigGroup("entity_renderer_dispatcher_mixin_group");
+
+    @ConfigGroup.Pop
+    public ValidatedBoolean entityRenderDispatcherMixinShouldRender = new ValidatedBoolean(true);
+
     @Override
     public @NotNull FileType fileType() {
         return FileType.JSON;

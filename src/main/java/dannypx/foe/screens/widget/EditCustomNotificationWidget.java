@@ -98,15 +98,15 @@ public class EditCustomNotificationWidget extends AbstractWidget implements Scre
         removeAllEntries();
         hasSelectedOption = true;
         newName = id;
-        icon = customNotification.icon;
+        icon = customNotification.getIcon();
         currentSelectedNotification = id;
         header = Component.literal(id);
         idEditBox.setValue(id);
         idEditBox.setHint(Component.literal(id));
-        iconEditBox.setValue(customNotification.icon);
-        iconEditBox.setHint(Component.literal(customNotification.icon));
+        iconEditBox.setValue(customNotification.getIcon());
+        iconEditBox.setHint(Component.literal(customNotification.getIcon()));
 
-        customNotification.stringLines.forEach(line -> this.addEntry(new LineEntry(
+        customNotification.getStringLines().forEach(line -> this.addEntry(new LineEntry(
                 line,
                 width,
                 getDefaultCallback()
@@ -188,7 +188,6 @@ public class EditCustomNotificationWidget extends AbstractWidget implements Scre
                 CommonColors.WHITE
         );
 
-        // Draw scale text
         guiGraphics.drawString(
                 minecraft.font,
                 "Icon",

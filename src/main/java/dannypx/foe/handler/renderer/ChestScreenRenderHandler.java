@@ -32,6 +32,7 @@ public class ChestScreenRenderHandler extends ScreenHandler {
 
     //region Methods
     public void init(Screen screen) {
+        SearchHandler.instance().setFocused(false);
         SearchHandler.instance().setOnScreen(true);
         this.initWidgets(screen);
     }
@@ -60,6 +61,10 @@ public class ChestScreenRenderHandler extends ScreenHandler {
         super.render(screen, guiGraphics, mouseX, mouseY, tickDelta);
 
         searchBarWidget.render(guiGraphics, tickDelta);
+    }
+
+    public void onClose(Screen screen) {
+        SearchHandler.instance().setOnScreen(false);
     }
     //endregion
 

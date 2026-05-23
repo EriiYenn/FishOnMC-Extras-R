@@ -37,26 +37,27 @@ public class PlaceholderHandler extends Handler {
 
     //region Fields
     private static final Map<String, Function<String[], Pair<Boolean, PlaceholderValue>>> placeholders = Map.ofEntries(
-            Map.entry("boss_bar", params -> BossEventHandler.instance().getBossBar(params)),
-            Map.entry("player", params -> LocalPlayerHandler.instance().getClientPlayer(params)),
-            Map.entry("network", params -> NetworkHandler.instance().getNetwork(params)),
-            Map.entry("scoreboard", params -> ScoreboardHandler.instance().getScoreboard(params)),
-            Map.entry("tab", params -> TabOverlayHandler.instance().getTab(params)),
-            Map.entry("title", params -> TitleHandler.instance().getTitle(params)),
-            Map.entry("connection", params -> ConnectionHandler.instance().getConnection(params)),
-            Map.entry("inventory", params -> InventoryHandler.instance().getInventory(params)),
-            Map.entry("key_bind", params -> KeyBindHandler.instance().getKeyBind(params)),
-            Map.entry("loading", params -> LoadingHandler.instance().getLoading(params)),
-            Map.entry("ray_cast", params -> HitResultHandler.instance().getRayCast(params)),
-            Map.entry("crew", params -> CrewHandler.instance().getCrew(params)),
-            Map.entry("chat", params -> ChatHandler.instance().getChat(params)),
-            Map.entry("timer", params -> TimerHandler.instance().getTimer(params)),
-            Map.entry("catch", params -> CatchingHandler.instance().getCatch(params)),
-            Map.entry("constant_data", params -> ConstantDataHandler.instance().getConstantData(params)),
-            Map.entry("profile_data", params -> ProfileDataHandler.instance().getProfileData(params)),
-            Map.entry("quest_data", params -> QuestDataHandler.instance().getQuestData(params)),
-            Map.entry("stats_data", params -> StatsDataHandler.instance().getStatsData(params)),
-            Map.entry("crew_data", params -> CrewDataHandler.instance().getCrewData(params))
+            Map.entry("boss_bar", BossEventHandler.instance()::getBossBar),
+            Map.entry("player", LocalPlayerHandler.instance()::getClientPlayer),
+            Map.entry("network", NetworkHandler.instance()::getNetwork),
+            Map.entry("scoreboard", ScoreboardHandler.instance()::getScoreboard),
+            Map.entry("tab", TabOverlayHandler.instance()::getTab),
+            Map.entry("title", TitleHandler.instance()::getTitle),
+            Map.entry("connection", ConnectionHandler.instance()::getConnection),
+            Map.entry("inventory", InventoryHandler.instance()::getInventory),
+            Map.entry("key_bind", KeyBindHandler.instance()::getKeyBind),
+            Map.entry("loading", LoadingHandler.instance()::getLoading),
+            Map.entry("ray_cast", HitResultHandler.instance()::getRayCast),
+            Map.entry("crew", CrewHandler.instance()::getCrew),
+            Map.entry("chat", ChatHandler.instance()::getChat),
+            Map.entry("timer", TimerHandler.instance()::getTimer),
+            Map.entry("catch", CatchingHandler.instance()::getCatch),
+            Map.entry("tracker_data", CustomTrackerDataHandler.instance()::getCustomTrackerData),
+            Map.entry("constant_data", ConstantDataHandler.instance()::getConstantData),
+            Map.entry("profile_data", ProfileDataHandler.instance()::getProfileData),
+            Map.entry("quest_data", QuestDataHandler.instance()::getQuestData),
+            Map.entry("stats_data", StatsDataHandler.instance()::getStatsData),
+            Map.entry("crew_data", CrewDataHandler.instance()::getCrewData)
     );
 
     private static final Map<String, Function<FunctionParser.FunctionPlaceholder, Pair<Boolean, PlaceholderValue>>> functionPlaceholders = Map.ofEntries(

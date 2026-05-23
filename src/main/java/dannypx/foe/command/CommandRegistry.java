@@ -1,6 +1,8 @@
 package dannypx.foe.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import dannypx.foe.FishOnMCExtras;
@@ -11,6 +13,12 @@ import dannypx.foe.handler.logic.TimerHandler;
 import dannypx.foe.handler.store.*;
 import dannypx.foe.helper.ComponentHelper;
 import dannypx.foe.screens.MainScreen;
+import dannypx.foe.type.custom_value.BooleanValue;
+import dannypx.foe.type.custom_value.EmptyValue;
+import dannypx.foe.type.custom_value.NumberValue;
+import dannypx.foe.type.custom_value.TrackerValue;
+import dannypx.foe.type.tracker.TrackerAction;
+import dannypx.foe.type.tracker.TrackerType;
 import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -19,6 +27,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import java.util.List;
+import java.util.Map;
 
 public class CommandRegistry {
     public static void init() {
@@ -42,16 +51,130 @@ public class CommandRegistry {
                 .then(command("reset_to_defaults")
                         .then(command("button").executes(Command.Reset::resetButton))
                         .then(command("chat_trigger").executes(Command.Reset::resetChatTrigger))
+                        .then(command("event_trigger").executes(Command.Reset::resetEventTrigger))
                         .then(command("notification").executes(Command.Reset::resetNotification))
+                        .then(command("chat_notification").executes(Command.Reset::resetChatNotification))
                         .then(command("timer").executes(Command.Reset::resetTimer))
                         .then(command("hud").executes(Command.Reset::resetHud))
+                        .then(command("tracker").executes(Command.Reset::resetTracker))
+                )
+                .then(command("fix_defaults")
+                        .then(command("chat_trigger").executes(Command.Fix::fixChatTrigger))
+                        .then(command("event_trigger").executes(Command.Fix::fixEventTrigger))
+                        .then(command("notification").executes(Command.Fix::fixNotification))
+                        .then(command("chat_notification").executes(Command.Fix::fixChatNotification))
+                        .then(command("timer").executes(Command.Fix::fixTimer))
+                        .then(command("hud").executes(Command.Fix::fixHud))
+                        .then(command("tracker").executes(Command.Fix::fixTracker))
                 )
                 .then(command("toggle")
                         .then(command("render")
                                 .then(command("armor").executes(Command.Toggle::toggleArmor))
                                 .then(command("pet_names").executes(Command.Toggle::togglePetNames))
+                                .then(command("name_plates").executes(Command.Toggle::toggleNamePlates))
                                 .then(command("fishingHook_model").executes(Command.Toggle::toggleFishingHookModel))
                                 .then(command("bait_on_fishing_hook").executes(Command.Toggle::toggleBaitOnFishingHook))
+                        )
+                )
+                .then(command("tracker")
+                        .then(command("set")
+                                .then(ClientCommandManager.argument("tracker", StringArgumentType.string()).then(
+                                        ClientCommandManager.argument("value", StringArgumentType.string())
+                                                .executes(Command.DataTracker::setValue)
+                                ))
+                        )
+                        .then(command("toggle")
+                                .then(ClientCommandManager.argument("tracker", StringArgumentType.string())
+                                        .executes(Command.DataTracker::toggleValue)
+                                )
+                        )
+                        .then(command("add")
+                                .then(ClientCommandManager.argument("tracker", StringArgumentType.string()).then(
+                                        ClientCommandManager.argument("value", IntegerArgumentType.integer(0))
+                                                .executes(Command.DataTracker::addValue)
+                                ))
+                        )
+                        .then(command("subtract")
+                                .then(ClientCommandManager.argument("tracker", StringArgumentType.string()).then(
+                                        ClientCommandManager.argument("value", IntegerArgumentType.integer(0))
+                                                .executes(Command.DataTracker::subtractValue)
+                                ))
+                        )
+                )
+                .then(command("stats_data")
+                        .then(command("set")
+                                .then(command("fish")
+                                        .then(command("total")
+                                                .then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                        context -> Command.DataStats.updateTotal(context, "fish")
+                                                ))
+                                        )
+                                        .then(command("size")
+                                                .then(ClientCommandManager.argument("field", StringArgumentType.string())
+                                                        .then(command("amount").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                                context -> Command.DataStats.updateField(context, "fish", "size", "amount")
+                                                        )))
+                                                        .then(command("caught_on").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                                context -> Command.DataStats.updateField(context, "fish", "size", "caught_on")
+                                                        )))
+                                                )
+                                        )
+                                        .then(command("variant")
+                                                .then(ClientCommandManager.argument("field", StringArgumentType.string())
+                                                        .then(command("amount").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                                context -> Command.DataStats.updateField(context, "fish", "variant", "amount")
+                                                        )))
+                                                        .then(command("caught_on").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                                context -> Command.DataStats.updateField(context, "fish", "variant", "caught_on")
+                                                        )))
+                                                )
+                                        )
+                                        .then(command("rarity")
+                                                .then(ClientCommandManager.argument("field", StringArgumentType.string())
+                                                        .then(command("amount").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                                context -> Command.DataStats.updateField(context, "fish", "rarity", "amount")
+                                                        )))
+                                                        .then(command("caught_on").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                                context -> Command.DataStats.updateField(context, "fish", "rarity", "caught_on")
+                                                        )))
+                                                )
+                                        )
+                                )
+                                .then(command("pet")
+                                        .then(command("total")
+                                                .then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(context -> Command.DataStats.updateTotal(context, "pet")))
+                                        )
+                                        .then(command("rarity")
+                                                .then(ClientCommandManager.argument("field", StringArgumentType.string())
+                                                        .then(command("amount").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                                context -> Command.DataStats.updateField(context, "pet", "rarity", "amount")
+                                                        )))
+                                                        .then(command("caught_on").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                                context -> Command.DataStats.updateField(context, "pet", "rarity", "caught_on")
+                                                        )))
+                                                )
+                                        )
+                                        .then(command("rating")
+                                                .then(ClientCommandManager.argument("field", StringArgumentType.string())
+                                                        .then(command("amount").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                                context -> Command.DataStats.updateField(context, "pet", "rating", "amount")
+                                                        )))
+                                                        .then(command("caught_on").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                                context -> Command.DataStats.updateField(context, "pet", "rating", "caught_on")
+                                                        )))
+                                                )
+                                        )
+                                )
+                                .then(command("item")
+                                        .then(ClientCommandManager.argument("field", StringArgumentType.string())
+                                                .then(command("amount").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                        context -> Command.DataStats.updateField(context, "item","amount")
+                                                )))
+                                                .then(command("caught_on").then(ClientCommandManager.argument("value", IntegerArgumentType.integer()).executes(
+                                                        context -> Command.DataStats.updateField(context, "item","caught_on")
+                                                )))
+                                        )
+                                )
                         )
                 )
                 .executes(Command.Foe::openMainScreen)
@@ -114,8 +237,20 @@ public class CommandRegistry {
                 });
             }
 
+            public static int resetEventTrigger(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Reset event triggers to default config").withStyle(ChatFormatting.GREEN), () -> {
+                    CustomEventTriggerDataHandler.instance().resetEventTrigger();
+                });
+            }
+
             public static int resetNotification(CommandContext<FabricClientCommandSource> context) {
-                return executeCommand(context, Component.literal("Reset notifications to default config").withStyle(ChatFormatting.GREEN), () -> CustomNotificationDataHandler.instance().resetNotifications());
+                return executeCommand(context, Component.literal("Reset notifications to default config").withStyle(ChatFormatting.GREEN), () ->
+                        CustomNotificationDataHandler.instance().resetNotifications());
+            }
+
+            public static int resetChatNotification(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Reset chat notifications to default config").withStyle(ChatFormatting.GREEN), () ->
+                        CustomChatNotificationDataHandler.instance().resetChatNotifications());
             }
 
             public static int resetTimer(CommandContext<FabricClientCommandSource> context) {
@@ -127,6 +262,50 @@ public class CommandRegistry {
 
             public static int resetHud(CommandContext<FabricClientCommandSource> context) {
                 return executeCommand(context, Component.literal("Reset HUDs to default config").withStyle(ChatFormatting.GREEN), () -> CustomHudDataHandler.instance().resetHuds());
+            }
+
+            public static int resetTracker(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Reset trackers to default config").withStyle(ChatFormatting.GREEN), () -> CustomTrackerDataHandler.instance().resetTrackers());
+            }
+        }
+
+        static class Fix {
+            public static int fixChatTrigger(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Fixed default chat triggers").withStyle(ChatFormatting.GREEN), () -> {
+                    CustomChatTriggerDataHandler.instance().fixDefault();
+                    ChatHandler.instance().initChatTrigger();
+                });
+            }
+
+            public static int fixEventTrigger(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Fixed default event triggers").withStyle(ChatFormatting.GREEN), () -> {
+                    CustomEventTriggerDataHandler.instance().fixDefault();
+                });
+            }
+
+            public static int fixNotification(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Fixed default notifications").withStyle(ChatFormatting.GREEN), () ->
+                        CustomNotificationDataHandler.instance().fixDefault());
+            }
+
+            public static int fixChatNotification(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Fixed default chat notifications").withStyle(ChatFormatting.GREEN), () ->
+                        CustomChatNotificationDataHandler.instance().fixDefault());
+            }
+
+            public static int fixTimer(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Fixed default timers").withStyle(ChatFormatting.GREEN), () -> {
+                    CustomTimerDataHandler.instance().fixDefault();
+                    TimerHandler.instance().initTimers();
+                });
+            }
+
+            public static int fixHud(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Fixed default HUDs").withStyle(ChatFormatting.GREEN), () -> CustomHudDataHandler.instance().fixDefault());
+            }
+
+            public static int fixTracker(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Fixed default trackers").withStyle(ChatFormatting.GREEN), () -> CustomTrackerDataHandler.instance().fixDefault());
             }
         }
 
@@ -145,6 +324,13 @@ public class CommandRegistry {
                 });
             }
 
+            public static int toggleNamePlates(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Toggled Name Plates"), () -> {
+                    Configs.rendererConfig.showPlayerNamePlate.accept(!Configs.rendererConfig.showPlayerNamePlate.get());
+                    Configs.rendererConfig.save();
+                });
+            }
+
             public static int toggleFishingHookModel(CommandContext<FabricClientCommandSource> context) {
                 return executeCommand(context, Component.literal("Toggled Fishing Hook Model"), () -> {
                     Configs.rendererConfig.showNewFishingHook.accept(!Configs.rendererConfig.showNewFishingHook.get());
@@ -157,6 +343,161 @@ public class CommandRegistry {
                     Configs.rendererConfig.showBaitOnFishingHook.accept(!Configs.rendererConfig.showBaitOnFishingHook.get());
                     Configs.rendererConfig.save();
                 });
+            }
+        }
+
+        static class DataTracker {
+            public static int setValue(CommandContext<FabricClientCommandSource> context) {
+                String tracker = StringArgumentType.getString(context, "tracker");
+                String value = StringArgumentType.getString(context, "value");
+
+                if(CustomTrackerDataHandler.instance().getCustomTrackerData().trackerList.containsKey(tracker)) {
+                    if("true".equals(value) || "false".equals(value)) {
+                        if(CustomTrackerDataHandler.instance().getCustomTrackerData().trackerList.get(tracker).getTrackerType() == TrackerType.BOOLEAN) {
+                            boolean parsed = Boolean.parseBoolean(value);
+                            TrackerValue trackerValue = BooleanValue.of(parsed);
+                            return updateValue(context, TrackerAction.SET, tracker, trackerValue);
+                        } else {
+                            return sendFeedback(context, Component.literal("Value must be a number").withStyle(ChatFormatting.RED));
+                        }
+                    }
+
+                    try {
+                        if(CustomTrackerDataHandler.instance().getCustomTrackerData().trackerList.get(tracker).getTrackerType() == TrackerType.INTEGER) {
+                            int parsed = Integer.parseInt(value);
+                            TrackerValue trackerValue = NumberValue.of(parsed);
+                            return updateValue(context, TrackerAction.SET, tracker, trackerValue);
+                        } else {
+                            return sendFeedback(context, Component.literal("Value must be a boolean").withStyle(ChatFormatting.RED));
+                        }
+
+                    } catch (Exception ignored) {}
+
+                    return sendFeedback(context, Component.literal("Could not parse value").withStyle(ChatFormatting.RED));
+                } else {
+                    return sendFeedback(context, Component.literal("Could not find tracker").withStyle(ChatFormatting.RED));
+                }
+            }
+
+            public static int toggleValue(CommandContext<FabricClientCommandSource> context) {
+                String tracker = StringArgumentType.getString(context, "tracker");
+
+                if(CustomTrackerDataHandler.instance().getCustomTrackerData().trackerList.containsKey(tracker)) {
+                    if(CustomTrackerDataHandler.instance().getCustomTrackerData().trackerList.get(tracker).getTrackerType() == TrackerType.BOOLEAN) {
+                        return updateValue(context, TrackerAction.TOGGLE, tracker, EmptyValue.getDefault());
+                    } else {
+                        return sendFeedback(context, Component.literal("Tracker is not a boolean").withStyle(ChatFormatting.RED));
+                    }
+                } else {
+                    return sendFeedback(context, Component.literal("Could not find tracker").withStyle(ChatFormatting.RED));
+                }
+            }
+
+            public static int addValue(CommandContext<FabricClientCommandSource> context) {
+                String tracker = StringArgumentType.getString(context, "tracker");
+                int value = IntegerArgumentType.getInteger(context, "value");
+
+                if(CustomTrackerDataHandler.instance().getCustomTrackerData().trackerList.containsKey(tracker)) {
+                    if(CustomTrackerDataHandler.instance().getCustomTrackerData().trackerList.get(tracker).getTrackerType() == TrackerType.INTEGER) {
+                        TrackerValue trackerValue = NumberValue.of(value);
+                        return updateValue(context, TrackerAction.ADD, tracker, trackerValue);
+                    } else {
+                        return sendFeedback(context, Component.literal("Tracker must be a integer").withStyle(ChatFormatting.RED));
+                    }
+                } else {
+                    return sendFeedback(context, Component.literal("Could not find tracker").withStyle(ChatFormatting.RED));
+                }
+            }
+
+            public static int subtractValue(CommandContext<FabricClientCommandSource> context) {
+                String tracker = StringArgumentType.getString(context, "tracker");
+                int value = IntegerArgumentType.getInteger(context, "value");
+
+                if(CustomTrackerDataHandler.instance().getCustomTrackerData().trackerList.containsKey(tracker)) {
+                    if(CustomTrackerDataHandler.instance().getCustomTrackerData().trackerList.get(tracker).getTrackerType() == TrackerType.INTEGER) {
+                        TrackerValue trackerValue = NumberValue.of(value);
+                        return updateValue(context, TrackerAction.SUBTRACT, tracker, trackerValue);
+                    } else {
+                        return sendFeedback(context, Component.literal("Tracker must be a integer").withStyle(ChatFormatting.RED));
+                    }
+                } else {
+                    return sendFeedback(context, Component.literal("Could not find tracker").withStyle(ChatFormatting.RED));
+                }
+            }
+
+            private static int updateValue(CommandContext<FabricClientCommandSource> context, TrackerAction action, String tracker, TrackerValue value) {
+                return switch (value) {
+                    case BooleanValue booleanValue -> switch (action) {
+                        case SET -> executeCommand(context, Component.literal("Set " + tracker + " to " + booleanValue.value()), () -> {
+                            CustomTrackerDataHandler.instance().updateTracker(tracker, action, booleanValue);
+                        });
+                        default -> sendFeedback(context, Component.literal("Error").withStyle(ChatFormatting.RED));
+                    };
+                    case NumberValue numberValue -> switch (action) {
+                        case SET -> executeCommand(context, Component.literal("Set " + tracker + " to " + numberValue.value()), () -> {
+                            CustomTrackerDataHandler.instance().updateTracker(tracker, action, numberValue);
+                        });
+                        case ADD -> executeCommand(context, Component.literal("Add " + numberValue.value() + " to " + tracker), () -> {
+                            CustomTrackerDataHandler.instance().updateTracker(tracker, action, numberValue);
+                        });
+                        case SUBTRACT -> executeCommand(context, Component.literal("Subtract " + numberValue.value() + " to " + tracker), () -> {
+                            CustomTrackerDataHandler.instance().updateTracker(tracker, action, numberValue);
+                        });
+                        default -> sendFeedback(context, Component.literal("Error").withStyle(ChatFormatting.RED));
+                    };
+                    case EmptyValue ignored -> switch (action) {
+                        case TOGGLE -> executeCommand(context, Component.literal("Toggle " + tracker), () -> {
+                            CustomTrackerDataHandler.instance().updateTracker(tracker, action, EmptyValue.getDefault());
+                        });
+                        default -> sendFeedback(context, Component.literal("Error").withStyle(ChatFormatting.RED));
+                    };
+                    default -> sendFeedback(context, Component.literal("Error").withStyle(ChatFormatting.RED));
+                };
+            }
+        }
+
+        static class DataStats {
+            public static int updateTotal(CommandContext<FabricClientCommandSource> context, String set) {
+                int value = IntegerArgumentType.getInteger(context, "value");
+                return executeCommand(context, Component.literal("Updated " + set + " total to " + value), () -> {
+                    StatsDataHandler.instance().updateData(set, value);
+                });
+            }
+
+            public static int updateField(CommandContext<FabricClientCommandSource> context, String set, String category, String type) {
+                String field = StringArgumentType.getString(context, "field");
+                int value = IntegerArgumentType.getInteger(context, "value");
+
+                return switch (set) {
+                    case "fish" -> {
+                        Map<String, Map<String, StatsDataHandler.Stat<Integer, Integer>>> fishData = StatsDataHandler.instance().getStatsData().fishData;
+                        Map<String, StatsDataHandler.Stat<Integer, Integer>> statsData = fishData.get(category);
+                        if(statsData.containsKey(field)) {
+                            yield executeCommand(context, Component.literal("Updated " + category + " " + field + " " + type + " to " + value), () ->
+                                    StatsDataHandler.instance().updateData(set, category, field, type, value));
+                        } else yield sendFeedback(context, Component.literal("Field does not exist").withStyle(ChatFormatting.RED));
+                    }
+                    case "pet" -> {
+                        Map<String, Map<String, StatsDataHandler.Stat<Integer, Integer>>> petData = StatsDataHandler.instance().getStatsData().petData;
+                        Map<String, StatsDataHandler.Stat<Integer, Integer>> statsData = petData.get(category);
+                        if(statsData.containsKey(field)) {
+                            yield executeCommand(context, Component.literal("Updated " + category + " " + field + " " + type + " to " + value), () ->
+                                    StatsDataHandler.instance().updateData(set, category, field, type, value));
+                        } else yield sendFeedback(context, Component.literal("Field does not exist").withStyle(ChatFormatting.RED));
+                    }
+                    default -> sendFeedback(context, Component.literal("Error").withStyle(ChatFormatting.RED));
+                };
+            }
+
+            public static int updateField(CommandContext<FabricClientCommandSource> context, String set, String type) {
+                String field = StringArgumentType.getString(context, "field");
+                int value = IntegerArgumentType.getInteger(context, "value");
+
+                Map<String, StatsDataHandler.Stat<Integer, Integer>> statsData = StatsDataHandler.instance().getStatsData().itemData;
+                if(statsData.containsKey(field)) {
+                    return executeCommand(context, Component.literal("Updated " + field + " " + type + " to " + value), () ->
+                            StatsDataHandler.instance().updateData(set, field, type, value));
+                } else return sendFeedback(context, Component.literal("Field does not exist").withStyle(ChatFormatting.RED));
             }
         }
     }

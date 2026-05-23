@@ -23,8 +23,11 @@ public class DataModels {
         CUSTOM_HUD_DATA("custom_hud"),
         CUSTOM_BUTTON_DATA("custom_button"),
         CUSTOM_NOTIFICATION_DATA("custom_notification"),
+        CUSTOM_CHAT_NOTIFICATION_DATA("custom_chat_notification"),
         CUSTOM_CHAT_TRIGGER_DATA("custom_chat_trigger"),
-        CUSTOM_TIMER_DATA("custom_timer");
+        CUSTOM_EVENT_TRIGGER_DATA("custom_event_trigger"),
+        CUSTOM_TIMER_DATA("custom_timer"),
+        CUSTOM_TRACKER_DATA("custom_tracker");
 
         public final String FILENAME;
 

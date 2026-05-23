@@ -1,24 +1,24 @@
 package dannypx.foe.handler.fetch;
 
 import dannypx.foe.handler.Handler;
+import dannypx.foe.handler.logic.ChatNotifierHandler;
 import dannypx.foe.handler.logic.CodeExecuterHandler;
 import dannypx.foe.handler.logic.NotifierHandler;
 import dannypx.foe.handler.logic.PlaceholderHandler;
+import dannypx.foe.handler.store.ConstantDataHandler;
 import dannypx.foe.handler.store.CustomChatTriggerDataHandler;
+import dannypx.foe.handler.store.CustomTrackerDataHandler;
 import dannypx.foe.handler.store.ProfileDataHandler;
 import dannypx.foe.helper.ComponentHelper;
 import dannypx.foe.type.placeholder.PlaceholderValue;
 import dannypx.foe.type.placeholder.ComponentValue;
 import dannypx.foe.type.tuple.Pair;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.MatchResult;
-import java.util.regex.Matcher;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -100,67 +100,57 @@ public class ChatHandler extends Handler {
 
     private void checkChatTrigger(Component component) {
         CustomChatTriggerDataHandler.instance().getCustomChatTriggerData().chatTriggerList.forEach((name, trigger) -> {
-            if(!trigger.regex.isBlank()
-                    && trigger.pattern.matcher(component.getString()).matches()
+            if(!trigger.getRegex().isBlank()
+                    && trigger.getPattern().matcher(component.getString()).matches()
             ) {
                 storedChatTriggerComponent.put(name, component);
-                if(!trigger.notificationToTrigger.isBlank()
-                        && trigger.useChatTrigger
+                if(trigger.getNotificationToTrigger() != null
+                        && !trigger.getNotificationToTrigger().isBlank()
+                        && trigger.isUseChatTrigger()
                 ) {
                     CodeExecuterHandler.runLater(1, () -> {
-                        NotifierHandler.instance().notifyChatTrigger(trigger.notificationToTrigger);
+                        NotifierHandler.instance().notifyOnTrigger(trigger.getNotificationToTrigger());
+                    });
+                }
+
+                if(trigger.getChatNotificationToTrigger() != null
+                        && !trigger.getChatNotificationToTrigger().isBlank()
+                        && trigger.isUseChatTrigger()
+                ) {
+                    CodeExecuterHandler.runLater(1, () -> {
+                        ChatNotifierHandler.instance().notifyChatOnTrigger(trigger.getChatNotificationToTrigger());
+                    });
+                }
+
+                if(trigger.getTrackerToTrigger() != null
+                        && !trigger.getTrackerToTrigger().isBlank()
+                        && trigger.isUseChatTrigger()
+                ) {
+                    CodeExecuterHandler.runLater(1, () -> {
+                        CustomTrackerDataHandler.instance().updateTracker(trigger.getTrackerToTrigger());
                     });
                 }
             }
         });
     }
 
-    public Component onModifyMessage(Component component) {
-        component = this.modifyPetMessageWithPercentage(component);
-        return component;
+    public String onModifyChatMessage(String text) {
+        AtomicReference<String> modified = new AtomicReference<>(text);
+        ConstantDataHandler.instance().getConstantData().fishData.forEach((category, fieldMap) -> {
+            fieldMap.forEach((stringField, textField) -> {
+                if(modified.get().contains(textField.getString().trim())) {
+                    modified.set(modified.get().replace(textField.getString().trim(), ComponentHelper.capitalize(stringField)));
+                }
+            });
+        });
+
+        modified.set(modified.get().replace("FoER » ", ""));
+
+        return modified.get();
     }
 
-    private Component modifyPetMessageWithPercentage(Component component) {
-
-        String json = ComponentHelper.componentToJson(component);
-        if (json.contains("ᴘᴇᴛ ʀᴀᴛɪɴɢ")) {
-            String petStr = json.substring(json.indexOf(" Pet\\n"), json.indexOf("ʀɪɢʜᴛ ᴄʟɪᴄᴋ ᴛᴏ ᴏᴘᴇɴ ᴘᴇᴛ ᴍᴇɴᴜ"));
-            Pattern statNumber = Pattern.compile("(?<=\\+)(.*?)(?=\")");
-            Matcher statNumberMatcher = statNumber.matcher(petStr);
-
-            if(statNumberMatcher.find()) {
-                List<String> matches = statNumberMatcher.results().map(MatchResult::group).toList();
-
-                String petClimateLuck = matches.get(matches.size() - 7);
-                String petClimateScale = matches.get(matches.size() - 5);
-                String petLocationLuck = matches.get(matches.size() - 3);
-                String petLocationScale = matches.getLast();
-
-                float multiplier = findMultiplier(petStr);
-                float total = Stream.of(petClimateLuck, petClimateScale, petLocationLuck, petLocationScale).mapToInt(Integer::parseInt).sum();
-
-                StringBuilder builder = new StringBuilder(petStr);
-                String petStrNew = petStr;
-
-                petStrNew = builder.insert(StringUtils.ordinalIndexOf(petStrNew, "\\n", 9), " (" + ComponentHelper.floatToString((Float.parseFloat(petClimateLuck) * 4 / multiplier), 0) + "%)").toString();
-                petStrNew = builder.insert(StringUtils.ordinalIndexOf(petStrNew, "\\n", 10), " (" + ComponentHelper.floatToString((Float.parseFloat(petClimateScale) * 4 / multiplier), 0) + "%)").toString();
-                petStrNew = builder.insert(StringUtils.ordinalIndexOf(petStrNew, "\\n", 13), " (" + ComponentHelper.floatToString((Float.parseFloat(petLocationLuck) * 4 / multiplier), 0) + "%)").toString();
-                petStrNew = builder.insert(StringUtils.ordinalIndexOf(petStrNew, "\\n", 14), " (" + ComponentHelper.floatToString((Float.parseFloat(petLocationScale) * 4 / multiplier), 0) + "%)").toString();
-                petStrNew = builder.insert(StringUtils.ordinalIndexOf(petStrNew, "\\n", 16), " (" + ComponentHelper.floatToString((total / multiplier), 0) + "%)").toString();
-
-                return ComponentHelper.jsonToComponent(json.replace(petStr, petStrNew));
-            }
-        }
+    public Component onModifyGameMessage(Component component) {
         return component;
-    }
-
-    private static float findMultiplier(String petStr) {
-        if (petStr.indexOf('\uf033') != -1) return 1f;
-        else if (petStr.indexOf('\uf034') != -1) return 2f;
-        else if (petStr.indexOf('\uf035') != -1) return 3f;
-        else if (petStr.indexOf('\uf036') != -1) return 5f;
-        else if (petStr.indexOf('\uf037') != -1) return 7.5f;
-        return 1;
     }
 
     public void cleanChatTriggerStore(String[] chatTriggers) {

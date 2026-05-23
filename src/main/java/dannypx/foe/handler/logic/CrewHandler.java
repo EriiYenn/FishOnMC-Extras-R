@@ -177,6 +177,7 @@ public class CrewHandler extends Handler {
 
             offlineMembers.add(updatedMember.get());
             NotifierHandler.instance().notifyPlayerStatus(false, crewMember);
+            EventHandler.instance().onCrewLeave();
         }
     }
 
@@ -198,6 +199,7 @@ public class CrewHandler extends Handler {
 
             onlineMembers.add(updatedMember.get());
             NotifierHandler.instance().notifyPlayerStatus(true, crewMember);
+            EventHandler.instance().onCrewJoin();
         }
     }
 

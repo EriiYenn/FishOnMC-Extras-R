@@ -30,19 +30,13 @@ public class AuctionHouseScreenRenderHandler extends ScreenHandler {
     }
 
     //region Fields
-    private boolean isOnScreen = false;
-
-    public void setOnScreen(boolean onScreen) {
-        isOnScreen = onScreen;
-    }
-
     public SearchBarWidget searchBarWidget;
     //endregion
 
     //region Methods
     public void init(Screen screen) {
+        SearchHandler.instance().setFocused(false);
         SearchHandler.instance().setOnScreen(true);
-        this.setOnScreen(true);
         this.initWidgets(screen);
     }
 
@@ -65,10 +59,8 @@ public class AuctionHouseScreenRenderHandler extends ScreenHandler {
         }
     }
 
-    public void checkMouseScroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if(isOnScreen
-                && screen instanceof ContainerScreen containerScreen
-        ) {
+    public boolean checkMouseScroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount, boolean consumed) {
+        if(screen instanceof ContainerScreen containerScreen) {
             int syncId = containerScreen.getMenu().containerId;
             int moveSlot = -1;
 
@@ -89,6 +81,12 @@ public class AuctionHouseScreenRenderHandler extends ScreenHandler {
                 );
             }
         }
+
+        return false;
+    }
+
+    public void onClose(Screen screen) {
+        SearchHandler.instance().setOnScreen(false);
     }
 
     @Override

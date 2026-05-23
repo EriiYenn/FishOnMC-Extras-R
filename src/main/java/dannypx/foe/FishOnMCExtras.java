@@ -1,7 +1,6 @@
 package dannypx.foe;
 
 import dannypx.foe.config.Configs;
-import dannypx.foe.handler.logic.LoggerHandler;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.loader.api.FabricLoader;
@@ -18,11 +17,15 @@ public class FishOnMCExtras implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static String VERSION = FishOnMCExtras.getModVersion();
 	public static List<String> AUTHORS = FishOnMCExtras.getAuthors();
+	public static List<String> CONTRIBUTORS = FishOnMCExtras.getContributors();
 	public static Integer HUD_VERSION = FishOnMCExtras.getVersion("hud_version");
 	public static Integer BUTTON_VERSION = FishOnMCExtras.getVersion("button_version");
 	public static Integer NOTIFICATION_VERSION = FishOnMCExtras.getVersion("notification_version");
+	public static Integer CHAT_NOTIFICATION_VERSION = FishOnMCExtras.getVersion("chat_notification_version");
 	public static Integer CHAT_TRIGGER_VERSION = FishOnMCExtras.getVersion("chat_trigger_version");
 	public static Integer TIMER_VERSION = FishOnMCExtras.getVersion("timer_version");
+	public static Integer EVENT_TRIGGER_VERSION = FishOnMCExtras.getVersion("event_trigger_version");
+	public static Integer TRACKER_VERSION = FishOnMCExtras.getVersion("tracker_version");
 
 	@Override
 	public void onInitialize() {
@@ -39,6 +42,13 @@ public class FishOnMCExtras implements ModInitializer {
 	private static List<String> getAuthors() {
 		if(getModContainer().isPresent()) {
 			return getModContainer().get().getMetadata().getAuthors().stream().map(Person::getName).toList();
+		}
+		return List.of();
+	}
+
+	private static List<String> getContributors() {
+		if(getModContainer().isPresent()) {
+			return getModContainer().get().getMetadata().getContributors().stream().map(Person::getName).toList();
 		}
 		return List.of();
 	}

@@ -13,7 +13,7 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedNumber;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-@Version(version = 5)
+@Version(version = 7)
 @Translatable.Name("Renderer Configuration")
 @Translatable.Desc("§7Configure renderer of various things")
 public class RendererConfig extends Config {
@@ -44,6 +44,9 @@ public class RendererConfig extends Config {
     @Name("Show pet names")
     public ValidatedBoolean showPetName = new ValidatedBoolean(true);
 
+    @Name("Show nameplate on players")
+    public ValidatedBoolean showPlayerNamePlate = new ValidatedBoolean(true);
+
     @Name("Use the 3D fishing hook texture")
     public ValidatedBoolean showNewFishingHook = new ValidatedBoolean(true);
 
@@ -71,10 +74,12 @@ public class RendererConfig extends Config {
     @Name("Small Stack Count Number")
     public ConfigGroup smallStackCountGroup = new ConfigGroup("small_stack_count_group");
 
-    @ConfigGroup.Pop
-    @Name("Use Small Stack Count Number")
-    @Desc("§7Disabling this will also stop the counter from displaying on baits/lures")
+    @Name("Use small stack count number")
     public ValidatedBoolean useSmallStackCountNumber = new ValidatedBoolean(true);
+
+    @ConfigGroup.Pop
+    @Name("Show stack count on bait")
+    public ValidatedBoolean showStackCountOnBait = new ValidatedBoolean(true);
 
     @Name("Tab Renderer")
     @Desc("§7This is the renderer for tab extras")

@@ -4,13 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dannypx.foe.FishOnMCExtras;
 import dannypx.foe.handler.Handler;
+import dannypx.foe.handler.logic.LoadingHandler;
 import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.handler.store.*;
+import dannypx.foe.type.custom_value.TrackerValue;
 import dannypx.foe.type.tuple.Pair;
-import dannypx.foe.type.type_adapter.CustomTimerAdapter;
-import dannypx.foe.type.type_adapter.ItemStackAdapter;
-import dannypx.foe.type.type_adapter.PatternAdapter;
-import dannypx.foe.type.type_adapter.ComponentAdapter;
+import dannypx.foe.type.type_adapter.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -51,8 +50,11 @@ public class DataFileHandler extends Handler {
         CustomHudDataHandler.instance().tick();
         CustomButtonDataHandler.instance().tick();
         CustomNotificationDataHandler.instance().tick();
+        CustomChatNotificationDataHandler.instance().tick();
         CustomChatTriggerDataHandler.instance().tick();
+        CustomEventTriggerDataHandler.instance().tick();
         CustomTimerDataHandler.instance().tick();
+        CustomTrackerDataHandler.instance().tick();
     }
 
     public void init() {
@@ -78,6 +80,7 @@ public class DataFileHandler extends Handler {
 
         } catch (IOException e) {
             LoggerHandler.error(e);
+            LoadingHandler.instance().setError(true);
         }
         return false;
     }
@@ -94,6 +97,7 @@ public class DataFileHandler extends Handler {
             LoggerHandler._debug("Updating file: " + dataModelType.FILENAME + ".json");
         } catch (IOException e) {
             LoggerHandler.error(e);
+            LoadingHandler.instance().setError(true);
         }
         return true;
     }
@@ -114,10 +118,12 @@ public class DataFileHandler extends Handler {
     private String dataModelToJson(DataModels.DataModel dataModel) {
         Gson gson = new GsonBuilder()
                 .setPrettyPrinting()
+                .serializeNulls()
                 .registerTypeAdapter(ItemStack.class, new ItemStackAdapter())
                 .registerTypeAdapter(Component.class, new ComponentAdapter())
                 .registerTypeAdapter(Pattern.class, new PatternAdapter())
                 .registerTypeAdapter(CustomTimerDataHandler.CustomTimer.class, new CustomTimerAdapter())
+                .registerTypeAdapter(TrackerValue.class, new TrackerValueAdapter())
                 .create();
         return gson.toJson(dataModel);
     }
@@ -134,6 +140,9 @@ public class DataFileHandler extends Handler {
             case CUSTOM_NOTIFICATION_DATA -> CustomNotificationDataHandler.instance().getCustomNotificationData();
             case CUSTOM_CHAT_TRIGGER_DATA -> CustomChatTriggerDataHandler.instance().getCustomChatTriggerData();
             case CUSTOM_TIMER_DATA -> CustomTimerDataHandler.instance().getCustomTimerData();
+            case CUSTOM_CHAT_NOTIFICATION_DATA -> CustomChatNotificationDataHandler.instance().getCustomChatNotificationData();
+            case CUSTOM_EVENT_TRIGGER_DATA -> CustomEventTriggerDataHandler.instance().getCustomEventTriggerData();
+            case CUSTOM_TRACKER_DATA -> CustomTrackerDataHandler.instance().getCustomTrackerData();
         };
     }
 
@@ -143,6 +152,7 @@ public class DataFileHandler extends Handler {
                 .registerTypeAdapter(Component.class, new ComponentAdapter())
                 .registerTypeAdapter(Pattern.class, new PatternAdapter())
                 .registerTypeAdapter(CustomTimerDataHandler.CustomTimer.class, new CustomTimerAdapter())
+                .registerTypeAdapter(TrackerValue.class, new TrackerValueAdapter())
                 .create();
 
         LoggerHandler._debug("Setting data from: " + dataModelType.FILENAME + ".json");
@@ -168,6 +178,12 @@ public class DataFileHandler extends Handler {
                     CustomChatTriggerDataHandler.instance().setCustomChatTriggerData(gson.fromJson(json, CustomChatTriggerDataHandler.CustomChatTriggerDataModel.class));
             case CUSTOM_TIMER_DATA ->
                     CustomTimerDataHandler.instance().setCustomTimerData(gson.fromJson(json, CustomTimerDataHandler.CustomTimerDataModel.class));
+            case CUSTOM_CHAT_NOTIFICATION_DATA ->
+                    CustomChatNotificationDataHandler.instance().setCustomChatNotificationData(gson.fromJson(json, CustomChatNotificationDataHandler.CustomChatNotificationDataModel.class));
+            case CUSTOM_EVENT_TRIGGER_DATA ->
+                    CustomEventTriggerDataHandler.instance().setCustomEventTriggerData(gson.fromJson(json, CustomEventTriggerDataHandler.CustomEventTriggerDataModel.class));
+            case CUSTOM_TRACKER_DATA ->
+                    CustomTrackerDataHandler.instance().setCustomTrackerData(gson.fromJson(json, CustomTrackerDataHandler.CustomTrackerDataModel.class));
         }
     }
     //endregion

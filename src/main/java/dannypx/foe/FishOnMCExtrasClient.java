@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -42,12 +43,12 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
         this.onInit();
 
         ClientLifecycleEvents.CLIENT_STARTED.register(this::onClientStarted);
-        ScreenEvents.BEFORE_INIT.register(this::onBeforeInitScreen);
         ClientPlayConnectionEvents.JOIN.register(this::onJoin);
         ClientPlayConnectionEvents.DISCONNECT.register(this::onLeave);
         ClientTickEvents.END_CLIENT_TICK.register(this::onEndClientTick);
         ClientReceiveMessageEvents.GAME.register(this::receiveGameMessage);
         ClientReceiveMessageEvents.MODIFY_GAME.register(this::modifyGameMessage);
+        ClientSendMessageEvents.MODIFY_CHAT.register(this::modifyChatMessage);
         ScreenEvents.AFTER_INIT.register(this::onAfterInitScreen);
         UseItemCallback.EVENT.register(this::onUseItem);
         ItemTooltipCallback.EVENT.register(this::onItemTooltip);
@@ -71,7 +72,11 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
     }
 
     private Component modifyGameMessage(Component message, boolean over) {
-        return ChatHandler.instance().onModifyMessage(message);
+        return ChatHandler.instance().onModifyGameMessage(message);
+    }
+
+    private String modifyChatMessage(String text) {
+        return ChatHandler.instance().onModifyChatMessage(text);
     }
 
     private InteractionResult onUseItem(Player player, Level level, InteractionHand hand) {
@@ -79,16 +84,9 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
     }
 
     private void onAfterInitScreen(Minecraft minecraft, Screen screen, int scaledWidth, int scaledHeight) {
-        SearchHandler.instance().setFocused(false);
-        SearchHandler.instance().setOnScreen(false);
-
-        PersonalVaultScreenRenderHandler.instance().setOnScreen(false);
-        AuctionHouseScreenRenderHandler.instance().setOnScreen(false);
-        PresetsScreenRenderHandler.instance().setOnScreen(false);
-
-        if(screen instanceof InventoryScreen) {
-            InventoryScreenRenderHandler.instance().init(screen);
-            ScreenMouseEvents.afterMouseScroll(screen).register(InventoryScreenRenderHandler.instance()::onMouseScrolled);
+        if(screen instanceof InventoryScreen inventoryScreen) {
+            InventoryScreenRenderHandler.instance().init(inventoryScreen);
+            ScreenMouseEvents.afterMouseScroll(inventoryScreen).register(InventoryScreenRenderHandler.instance()::onMouseScrolled);
         } else if(screen instanceof ContainerScreen genericContainerScreen) {
             GenericContainerScreenHandler.instance().init(genericContainerScreen);
             ScreenEvents.afterRender(screen).register(GenericContainerScreenHandler.instance()::render);
@@ -101,18 +99,6 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
 
     private void onRemoveScreen(Screen screen) {
         InventoryHandler.instance().trackFishOffSide();
-    }
-
-    private void onBeforeInitScreen(Minecraft minecraft, Screen screen, int scaledWidth, int scaledHeight) {
-        ScreenMouseEvents.afterMouseScroll(screen).register(this::afterMouseScroll);
-    }
-
-    private boolean afterMouseScroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount, boolean consumed) {
-        PersonalVaultScreenRenderHandler.instance().checkMouseScroll(screen, mouseX, mouseY, horizontalAmount, verticalAmount);
-        AuctionHouseScreenRenderHandler.instance().checkMouseScroll(screen, mouseX, mouseY, horizontalAmount, verticalAmount);
-        PresetsScreenRenderHandler.instance().checkMouseScroll(screen, mouseX, mouseY, horizontalAmount, verticalAmount);
-
-        return false;
     }
 
     private void initHudRenderer() {
@@ -147,7 +133,10 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
             CustomButtonDataHandler.instance().init();
             CustomNotificationDataHandler.instance().init();
             CustomChatTriggerDataHandler.instance().init();
+            CustomChatNotificationDataHandler.instance().init();
             CustomTimerDataHandler.instance().init();
+            CustomEventTriggerDataHandler.instance().init();
+            CustomTrackerDataHandler.instance().init();
 
             ScoreboardHandler.instance().init();
             CrewHandler.instance().init();

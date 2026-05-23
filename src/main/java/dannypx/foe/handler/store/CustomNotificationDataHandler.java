@@ -48,6 +48,7 @@ public class CustomNotificationDataHandler extends Handler {
             this.updateCustomNotificationData();
         } else if(!CustomNotificationDataModel.CUSTOM_NOTIFICATION_DATA_MODEL_VERSION.equals(customNotificationData.version)) {
             customNotificationData.version = CustomNotificationDataModel.CUSTOM_NOTIFICATION_DATA_MODEL_VERSION;
+            this.updateDefault();
             needsUpdate = true;
         }
     }
@@ -89,6 +90,17 @@ public class CustomNotificationDataHandler extends Handler {
         newNotification.icon = icon;
 
         customNotificationData.notificationList.put(currentSelectedNotification, newNotification);
+        needsUpdate = true;
+    }
+
+    public void updateDefault() {
+        CustomNotificationDataModel.defaultNotifications.forEach((key, timer) -> {
+            customNotificationData.notificationList.putIfAbsent(key, timer);
+        });
+    }
+
+    public void fixDefault() {
+        customNotificationData.notificationList.putAll(CustomNotificationDataModel.defaultNotifications);
         needsUpdate = true;
     }
 
@@ -137,9 +149,21 @@ public class CustomNotificationDataHandler extends Handler {
 
     //region Notification Object
     public static class CustomNotification {
-        public String name;
-        public String icon;
-        public List<String> stringLines;
+        private String name;
+        private String icon;
+        private List<String> stringLines;
+
+        public String getName() {
+            return name != null ? name : "";
+        }
+
+        public String getIcon() {
+            return icon != null ? icon : "";
+        }
+
+        public List<String> getStringLines() {
+            return stringLines != null ? stringLines : new ArrayList<>();
+        }
 
         public CustomNotification(String name, String icon, List<String> stringLines) {
             this.name = name;

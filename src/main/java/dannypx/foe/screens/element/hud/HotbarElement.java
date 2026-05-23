@@ -135,7 +135,9 @@ public class HotbarElement extends Element {
                 guiGraphics.renderItem(item, x + itemX + (18 * i), y + itemY);
 
                 if(Configs.rendererConfig.useSmallStackCountNumber.get()) {
-                    int count = validatedItem.value2().getCount();
+                    int count = Configs.rendererConfig.showStackCountOnBait.get()
+                            ? validatedItem.value2().getCount()
+                            : item.getCount();
                     Component countComponent = ComponentHelper.literal(ComponentHelper.smallCaps(ComponentHelper.shortenNumber(count, 0)));
                     int countWidth = font.width(countComponent);
 
@@ -146,14 +148,16 @@ public class HotbarElement extends Element {
                             false,
                             false);
                 } else {
-                    int count = item.getCount();
-                    Component countComponent = ComponentHelper.literal(count);
+                    int count = Configs.rendererConfig.showStackCountOnBait.get()
+                            ? validatedItem.value2().getCount()
+                            : item.getCount();
+                    Component countComponent = ComponentHelper.literal(ComponentHelper.shortenNumber(count, 0));
                     int countWidth = font.width(countComponent);
 
                     if(count > 1) GuiGraphicsHelper.drawString(guiGraphics, font, countComponent,
                             x + countX + (18 * i) - countWidth, y + countY - 2,
                             true,
-                            true,
+                            false,
                             false,
                             false);
                 }
@@ -286,23 +290,26 @@ public class HotbarElement extends Element {
                 //region Items
                 guiGraphics.renderItem(bait.getItemStack(), x + partsX, y + partsY);
 
-                if(Configs.rendererConfig.useSmallStackCountNumber.get()) {
+                if(Configs.rendererConfig.showStackCountOnBait.get()) {
+                    boolean isSmall = Configs.rendererConfig.useSmallStackCountNumber.get();
                     int count = bait.getCount();
-                    Component countComponent = ComponentHelper.literal(ComponentHelper.smallCaps(ComponentHelper.shortenNumber(count, 0)));
+                    Component countComponent = isSmall
+                            ? ComponentHelper.literal(ComponentHelper.smallCaps(ComponentHelper.shortenNumber(count, 0)))
+                            : ComponentHelper.literal(ComponentHelper.shortenNumber(count, 0));
                     int countWidth = font.width(countComponent);
 
                     if(count > 1) GuiGraphicsHelper.drawString(guiGraphics, font, countComponent,
-                            x + countX - countWidth, y + countY,
+                            x + countX - countWidth, isSmall ? y + countY : y + countY - 2,
                             true,
-                            true,
+                            isSmall,
                             false,
-                            true);
+                            isSmall);
+                }
 
-                    if(Configs.hudConfig.showBaitLock.get()
-                            && fishingRodTagObject.getDisableBait()
-                    ) {
-                        guiGraphics.drawString(font, Component.literal("\uD83D\uDD12"), x + 2, y + baitY, CommonColors.WHITE, true);
-                    }
+                if(Configs.hudConfig.showBaitLock.get()
+                        && fishingRodTagObject.getDisableBait()
+                ) {
+                    guiGraphics.drawString(font, Component.literal("\uD83D\uDD12"), x + 2, y + baitY, CommonColors.WHITE, true);
                 }
                 //endregion
             }

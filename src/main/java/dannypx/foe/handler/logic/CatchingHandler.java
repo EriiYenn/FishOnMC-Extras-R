@@ -5,6 +5,7 @@ import dannypx.foe.handler.fetch.TitleHandler;
 import dannypx.foe.handler.store.QuestDataHandler;
 import dannypx.foe.handler.store.StatsDataHandler;
 import dannypx.foe.item.FishTagObject;
+import dannypx.foe.item.PetTagObject;
 import dannypx.foe.item.TagObject;
 import dannypx.foe.item.ValidateItem;
 import dannypx.foe.type.placeholder.PlaceholderValue;
@@ -13,10 +14,13 @@ import dannypx.foe.type.placeholder.ComponentValue;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.config.Configs;
 import dannypx.foe.type.tuple.Triplet;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
+
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -40,8 +44,15 @@ public class CatchingHandler extends Handler {
     private String fishNameToFind = "";
 
     private FishTagObject lastCaughtFish = FishTagObject.empty();
+    private PetTagObject lastCaughtPet = PetTagObject.empty();
     // Rarity Variant Size
     private Triplet<Pair<String, Integer>, Pair<String, Integer>, Pair<String, Integer>> lastDataFish = null;
+
+    // Rarity Rating
+    private Pair<Pair<String, Integer>, Pair<String, Integer>> lastDataPet = null;
+
+    // Item RawItemName
+    private List<Pair<TagObject, Pair<String, Integer>>> lastCaughtItems = new ArrayList<>();
 
     public boolean isScanDone() {
         return scanDone;
@@ -94,6 +105,67 @@ public class CatchingHandler extends Handler {
                             }
                             yield PlaceholderHandler.noResult();
                         }
+                        case "pet" -> {
+                            if(lastCaughtPet.getItemStack() != ItemStack.EMPTY && lastDataPet != null) {
+                                yield switch (params[2]) {
+                                    case "name" -> PlaceholderHandler.getPlaceholderValue(new ComponentValue(lastCaughtPet.getName()));
+                                    case "rarity", "rating" -> {
+                                        Pair<String, Integer> drystreakData = null;
+                                        Component icon = null;
+
+                                        switch (params[2]) {
+                                            case "rarity" -> {
+                                                drystreakData = lastDataPet.value1();
+                                                icon = lastCaughtPet.getRarityComponent();
+                                            }
+                                            case "rating" -> {
+                                                drystreakData = lastDataPet.value2();
+                                                icon = lastCaughtPet.getRatingComponent();
+                                            }
+                                        }
+
+                                        if(icon != null
+                                                && params.length == 4
+                                        ) {
+                                            yield switch (params[3]) {
+                                                case "name" -> PlaceholderHandler.getPlaceholderValue(new StringValue(drystreakData.value1()));
+                                                case "icon" -> PlaceholderHandler.getPlaceholderValue(new ComponentValue(icon), true);
+                                                case "last_drystreak" -> PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(drystreakData.value2())));
+                                                default -> PlaceholderHandler.noResult();
+                                            };
+                                        }
+                                        yield PlaceholderHandler.noResult();
+                                    }
+                                    default -> PlaceholderHandler.getNbtValue(lastCaughtPet, params[2]);
+                                };
+                            }
+                            yield PlaceholderHandler.noResult();
+                        }
+                        case "item" -> {
+                            if(!lastCaughtItems.isEmpty()
+                                    && params.length > 4
+                            ) {
+                                try {
+                                    int index = Integer.parseInt(params[2]);
+                                    if(index < lastCaughtItems.size()) {
+                                        Pair<TagObject, Pair<String, Integer>> lastCaughtItem = lastCaughtItems.get(index);
+
+                                        yield switch (params[3]) {
+                                            case "name" -> PlaceholderHandler.getPlaceholderValue(new ComponentValue(lastCaughtItem.value1().getName()));
+                                            case "dry_streak" -> switch (params[4]) {
+                                                case "name" -> PlaceholderHandler.getPlaceholderValue(new StringValue(lastCaughtItem.value2().value1()));
+                                                case "last_drystreak" -> PlaceholderHandler.getPlaceholderValue(new StringValue(String.valueOf(lastCaughtItem.value2().value2())));
+                                                default -> PlaceholderHandler.noResult();
+                                            };
+                                            default -> PlaceholderHandler.getNbtValue(lastCaughtFish, params[2]);
+                                        };
+                                    }
+                                } catch (NumberFormatException e) {
+                                    yield PlaceholderHandler.noResult();
+                                }
+                            }
+                            yield PlaceholderHandler.noResult();
+                        }
                         default -> PlaceholderHandler.noResult();
                     };
                     default -> PlaceholderHandler.noResult();
@@ -124,8 +196,9 @@ public class CatchingHandler extends Handler {
 
                 CodeExecuterHandler.runLater(Configs.handlerConfig.catchingItemsDelayCheck.get(), this::checkForCaughtItems);
 
-                lastDataFish = prevStats;
                 lastCaughtFish = foundFish.value2();
+                lastDataFish = prevStats;
+                CodeExecuterHandler.runLater(1, EventHandler.instance()::onCatch);
                 this.scanDone = true;
             }
         } else if (!scanDone && System.currentTimeMillis() > startScanTime + (Configs.handlerConfig.catchingStatusCooldown.get() * 1000L)){
@@ -138,6 +211,7 @@ public class CatchingHandler extends Handler {
         LoggerHandler._debug("Start finding items");
         LoggerHandler._debug("Start Time: " + System.currentTimeMillis());
         LoggerHandler._debug("Search Window: " + (Configs.handlerConfig.catchingItemsCheckWindow.get() + (System.currentTimeMillis() - startScanTime)));
+        this.lastCaughtItems.clear();
         if(minecraft.player != null) {
             InventoryHandler.instance().getSnapshottedItems().stream()
                     .filter(item -> System.currentTimeMillis() - item.value1()
@@ -151,8 +225,15 @@ public class CatchingHandler extends Handler {
 
         if(validatedItem.value1()) {
             // Store to Stats
-            StatsDataHandler.instance().setItem(validatedItem.value2(), count);
-
+            Pair<Boolean, PetTagObject> validatePet = ValidateItem.isPet(validatedItem.value2());
+            if(validatePet.value1()) {
+                Pair<Pair<String, Integer>, Pair<String, Integer>> prevStats = StatsDataHandler.instance().setPet(validatePet.value2());
+                lastCaughtPet = validatePet.value2();
+                lastDataPet = prevStats;
+            } else {
+                Pair<String, Integer> prevStats = StatsDataHandler.instance().setOtherItem(validatedItem.value2(), count);
+                lastCaughtItems.add(Pair.of(validatedItem.value2(), prevStats));
+            }
             LoggerHandler._debug("Found Item: " + itemStack.getHoverName().getString(), itemStack);
         }
     }
